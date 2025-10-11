@@ -1,17 +1,26 @@
 import { Card, CardContent, CardHeader, Avatar, Typography, Stack } from '@mui/material'
+import type { WalletInfo } from '../api'
 
-export default function WalletSummaryCard() {
+interface Props {
+  walletData: WalletInfo | null
+}
+
+export default function WalletSummaryCard({ walletData }: Props) {
   return (
     <Card>
       <CardHeader
         avatar={<Avatar>Ξ</Avatar>}
         title="Wallet Summary"
-        subheader="Address/ENS and totals"
+        subheader={walletData?.address || "No wallet selected"}
       />
       <CardContent>
         <Stack spacing={1}>
-          <Typography variant="h5">Total Value — $0.00</Typography>
-          <Typography color="text.secondary">Last updated — --</Typography>
+          <Typography variant="h5">
+            ETH Balance — {walletData ? `${walletData.balance} ETH` : '0.00 ETH'}
+          </Typography>
+          <Typography color="text.secondary">
+            Last updated — {walletData ? new Date().toLocaleTimeString() : '--'}
+          </Typography>
         </Stack>
       </CardContent>
     </Card>

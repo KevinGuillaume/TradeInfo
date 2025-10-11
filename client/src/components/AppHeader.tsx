@@ -11,7 +11,7 @@ interface Props {
 export default function AppHeader({ mode, onToggleMode }: Props) {
 
   return (
-    <AppBar position="static" color="primary" enableColorOnDark>
+    <AppBar position="static" enableColorOnDark>
       <Toolbar>
         <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
           <MenuIcon />
@@ -20,7 +20,7 @@ export default function AppHeader({ mode, onToggleMode }: Props) {
           TradeInfo Dashboard
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Button variant="contained" color="secondary">Connect Wallet</Button>
+          <Button variant="contained" color="primary">Connect Wallet</Button>
           <IconButton color="inherit" aria-label="toggle theme" onClick={onToggleMode}>
             {mode === 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>

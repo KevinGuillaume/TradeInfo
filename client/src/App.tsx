@@ -4,9 +4,10 @@ import { useMemo, useEffect, useState } from 'react'
 import AppHeader from './components/AppHeader'
 import AddressSearch from './components/AddressSearch'
 import WalletSummaryCard from './components/WalletSummaryCard'
-import HoldingsDashboard from './components/HoldingsDashboard'
 import TransactionsDashboard from './components/TransactionsDashboard'
 import LiveStatusBar from './components/LiveStatusBar'
+import type { WalletInfo } from './api'
+import { etherscanAPI } from './api'
 
 function App() {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
@@ -15,10 +16,25 @@ function App() {
     if (stored === 'light' || stored === 'dark') return stored
     return prefersDark ? 'dark' : 'light'
   })
+  const [walletData, setWalletData] = useState<WalletInfo | null>(null)
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     localStorage.setItem('themeMode', mode)
   }, [mode])
   const theme = useMemo(() => createTheme({ palette: { mode } }), [mode])
+
+  const handleWalletSearch = async (address: string) => {
+    setLoading(true)
+    try {
+      const data = await etherscanAPI.getWalletInfo(address)
+      setWalletData(data)
+    } catch (error) {
+      console.error('Error fetching wallet data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -29,7 +45,7 @@ function App() {
             <LiveStatusBar />
           </Box>
           <Box sx={{ mb: 3 }}>
-            <AddressSearch />
+            <AddressSearch onSearch={handleWalletSearch} loading={loading} />
           </Box>
           <Box sx={{
             display: 'grid',
@@ -37,14 +53,11 @@ function App() {
             gap: 3
           }}>
             <Box>
-              <WalletSummaryCard />
+              <WalletSummaryCard walletData={walletData} />
             </Box>
             <Box>
-              <HoldingsDashboard />
+              <TransactionsDashboard walletData={walletData} />
             </Box>
-          </Box>
-          <Box sx={{ mt: 3 }}>
-            <TransactionsDashboard />
           </Box>
         </Container>
       </ThemeProvider>
