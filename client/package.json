@@ -16,10 +16,13 @@
     "@mui/material": "^7.3.4",
     "@mui/x-data-grid": "^8.13.1",
     "@reduxjs/toolkit": "^2.9.0",
+    "@types/react-router-dom": "^5.3.3",
     "ethers": "^6.15.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.9.4",
+    "web3modal": "^1.9.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

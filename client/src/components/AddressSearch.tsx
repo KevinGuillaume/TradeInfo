@@ -1,17 +1,17 @@
 import { Paper, Box, TextField, Button, Stack, CircularProgress } from '@mui/material'
 import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchWalletData } from '../store/walletSlice'
+import type { RootState } from '../store'
 
-interface Props {
-  onSearch: (address: string) => void
-  loading: boolean
-}
-
-export default function AddressSearch({ onSearch, loading }: Props) {
+export default function AddressSearch() {
   const [address, setAddress] = useState('')
+  const dispatch = useDispatch()
+  const loading = useSelector((state: RootState) => state.wallet.loading)
 
   const handleSubmit = async () => {
     if (address.trim()) {
-      onSearch(address.trim())
+      dispatch(fetchWalletData(address.trim()) as any)
     }
   }
 
