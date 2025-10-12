@@ -1,11 +1,9 @@
 import { Card, CardContent, CardHeader, Avatar, Typography, Stack } from '@mui/material'
-import type { WalletInfo } from '../api'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../store'
 
-interface Props {
-  walletData: WalletInfo | null
-}
-
-export default function WalletSummaryCard({ walletData }: Props) {
+export default function WalletSummaryCard() {
+  const walletData = useSelector((state: RootState) => state.wallet.data)
   return (
     <Card>
       <CardHeader

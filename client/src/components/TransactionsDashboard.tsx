@@ -1,11 +1,8 @@
 import { Card, CardContent, CardHeader } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import type { GridColDef } from '@mui/x-data-grid'
-import type { WalletInfo } from '../api'
-
-interface Props {
-  walletData: WalletInfo | null
-}
+import { useSelector } from 'react-redux'
+import type { RootState } from '../store'
 
 const columns: GridColDef[] = [
   { field: 'hash', headerName: 'Tx Hash', flex: 1 },
@@ -14,7 +11,8 @@ const columns: GridColDef[] = [
   { field: 'timeStamp', headerName: 'Time', width: 180 },
 ]
 
-export default function TransactionsDashboard({ walletData }: Props) {
+export default function TransactionsDashboard() {
+  const walletData = useSelector((state: RootState) => state.wallet.data)
   const rows = walletData?.transactions.map((tx) => ({
     id: tx.hash,
     hash: tx.hash,
