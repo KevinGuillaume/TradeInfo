@@ -16,7 +16,10 @@ export default function ProfilePage() {
             Profile page coming soon...
           </Typography>
           :
-          <div>This is yo address: {address}</div>
+          <div>
+              <div>This is yo address: {address}</div>
+             <div>You are currently connected to: {chainId}</div>
+          </div>
 
           }
         </Box>
