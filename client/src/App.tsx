@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import AppHeader from './components/AppHeader'
 import EtherscanPage from './pages/EtherscanPage'
 import ProfilePage from './pages/ProfilePage'
+import HomeDEX from './pages/HomeDex'
 
 function App() {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
@@ -26,8 +27,7 @@ function App() {
         <Router>
           <AppHeader mode={mode} onToggleMode={() => setMode(mode === 'light' ? 'dark' : 'light')} />
           <Routes>
-            <Route path="/" element={<EtherscanPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/" element={<HomeDEX />} />
           </Routes>
         </Router>
       </ThemeProvider>

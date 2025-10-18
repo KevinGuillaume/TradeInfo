@@ -1,4 +1,3 @@
-import { Container, Typography, Box, List, ListItem, ListItemText, Avatar, ListItemAvatar } from '@mui/material'
 import { useAppSelector } from '../store/hooks';
 import { alchemyAPI, type TokenBalance } from '../api';
 import { useEffect, useState } from 'react';
@@ -10,7 +9,7 @@ import { ethers } from 'ethers';
 
 
 
-export default function ProfilePage() {
+export default function ProfileSection() {
     const { address, chainId, connected, error } = useAppSelector((state) => state.currentAddress);
     const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
     const [loading, setLoading] = useState(false);

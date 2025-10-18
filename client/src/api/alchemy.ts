@@ -80,14 +80,16 @@ export class AlchemyAPI {
         const metadata = await this.request<TokenMetadata>('alchemy_getTokenMetadata', [
           token.contractAddress,
         ]);
-        balances.push({
-            contractAddress: token.contractAddress,
-            tokenName: metadata.name || 'Unknown',
-            tokenSymbol: metadata.symbol || 'Unknown',
-            balance: token.tokenBalance,
-            decimals: metadata.decimals || 18,
-            logo: metadata.logo
-        });
+        if (metadata.name && metadata.symbol && ( !metadata.name.includes(".") && !metadata.symbol.includes("."))) { // Only add things with values
+            balances.push({
+                contractAddress: token.contractAddress,
+                tokenName: metadata.name || 'Unknown',
+                tokenSymbol: metadata.symbol || 'Unknown',
+                balance: token.tokenBalance,
+                decimals: metadata.decimals || 18,
+                logo: metadata.logo
+            });
+        }
       } catch (err) {
         console.error(`Error fetching metadata for ${token.contractAddress}:`, err);
       }
