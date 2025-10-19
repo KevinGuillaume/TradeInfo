@@ -16,7 +16,7 @@ export default function ProfileSection() {
         if (!address || chainId !== 1) return;
         try {
           const balance: any = await backendAPI.getAccountBalance(address);
-          setEthBalance(balance);
+          setEthBalance(balance.balance);
         } catch (err) {
           setApiError('Failed to fetch ETH balance.');
         }
