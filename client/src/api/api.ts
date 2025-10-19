@@ -8,8 +8,10 @@ export class API {
 
     async getTokenBalances(address: string) {
         try {
+            console.log("Getting token balances for connected address...")
             const response = await fetch(this.baseURL + `/api/token-balances/${address}`)
-            return response
+            const data = await response.json()
+            return data
           } catch (err) {
             console.error('Error getting token balances', err);
         }
@@ -17,8 +19,10 @@ export class API {
 
     async getAccountBalance(address: string) {
         try {
+            console.log("Getting connected wallet balance...")
             const response = await fetch(this.baseURL + `/api/account-balance/${address}`)
-            return response
+            const data = await response.json()
+            return data
           } catch (err) {
             console.error('Error getting token balances', err);
         }
