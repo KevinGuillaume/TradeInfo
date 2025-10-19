@@ -3,8 +3,6 @@ import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from '@mui/mat
 import { useMemo, useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import AppHeader from './components/AppHeader'
-import EtherscanPage from './pages/EtherscanPage'
-import ProfilePage from './pages/ProfilePage'
 import HomeDEX from './pages/HomeDex'
 
 function App() {
