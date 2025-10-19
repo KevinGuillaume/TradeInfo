@@ -1,12 +1,7 @@
 import { useAppSelector } from '../store/hooks';
-import { alchemyAPI, type TokenBalance } from '../api';
+import { backendAPI, type TokenBalance } from '../api';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-
-
-
-
-
 
 
 export default function ProfileSection() {
@@ -20,7 +15,7 @@ export default function ProfileSection() {
     const fetchWalletInfo = async (address: string, chainId: number) => {
         if (!address || chainId !== 1) return;
         try {
-          const balance = await alchemyAPI.getAccountBalance(address);
+          const balance: any = await backendAPI.getAccountBalance(address);
           setEthBalance(balance);
         } catch (err) {
           setApiError('Failed to fetch ETH balance.');
@@ -36,7 +31,7 @@ export default function ProfileSection() {
     setApiError(null);
 
     try {
-        const balances = await alchemyAPI.getTokenBalances(address);
+        const balances: any = await backendAPI.getTokenBalances(address);
         console.log("balances: ", balances)
 
         setTokenBalances(balances);
