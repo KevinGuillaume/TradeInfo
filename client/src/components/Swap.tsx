@@ -38,6 +38,7 @@ export default function Swap() {
     setTokenTwo(token);
   };
 
+  // Handles the swapping between top and bottom section of swap component
   const handleTokenSwap = () => {
     const temp = tokenOne;
     setTokenOne(tokenTwo);
