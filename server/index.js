@@ -2,10 +2,17 @@ require('dotenv').config({ debug: true }); // Enable dotenv debug
 const express = require('express');
 const cors = require('cors');
 const AlchemyAPI = require('./apis/alchemy');
+const Moralis = require("moralis").default
 const axios = require('axios');
 
 const app = express();
 const PORT = 3005;
+
+Moralis.start({
+    apiKey: process.env.MORALIS_API_KEY
+});
+  
+
 
 app.use(express.json());
 app.use(cors({
@@ -58,26 +65,23 @@ app.get('/api/account-balance/:address', async (req, res) => {
 });
 
 
-// Get swap quote (using 1inch / still deciding if i want to move it out )
-app.get('/api/quote', async (req, res) => {
-    const { fromTokenAddress, toTokenAddress, amount } = req.query;
-    if (!fromTokenAddress || !toTokenAddress || !amount) {
-      return res.status(400).json({ error: 'Missing parameters: fromTokenAddress, toTokenAddress, amount' });
-    }
-  
-    try {
-      const quoteResponse = await axios.get('https://api.1inch.io/v5.0/1/quote', {
-        params: {
-          fromTokenAddress,
-          toTokenAddress,
-          amount,
-        },
-      });
-      res.json(quoteResponse.data);
-    } catch (err) {
-      console.error('Error fetching quote:', err.message);
-      res.status(500).json({ error: 'Failed to fetch quote' });
-    }
-  });
+app.get('/api/tokenPrice', async (req,res) => {
+    const {query} = req
 
+    const responseOne = await Moralis.EvmApi.token.getTokenPrice({
+        address: query.addressOne
+    })
+
+    const responseTwo = await Moralis.EvmApi.token.getTokenPrice({
+        address: query.addressTwo
+    })
+
+    const usdPrices = {
+        tokenOne: responseOne.raw.usdPrice,
+        tokenTwo: responseTwo.raw.usdPrice,
+        ratio: responseOne.raw.usdPrice / responseTwo.raw.usdPrice
+    }
+
+    return res.status(200).json(usdPrices)
+})
 

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import tokenList from '../data/token.json'
+import { backendAPI, type TokenBalance } from '../api';
 import TokenSelectModal from "./modals/TokenSelectModal";
+
 // This is shape of our token from the json list 
 interface Token {
   address: string;
@@ -18,6 +20,7 @@ export default function Swap() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [isTokenOneModalOpen, setIsTokenOneModalOpen] = useState(false);
   const [isTokenTwoModalOpen, setIsTokenModalTwoOpen] = useState(false);
+  const [prices,setPrices] = useState<any>({})
 
   const handleTokenOneSelect = (token: Token) => {
     setTokenOne(token);
@@ -42,9 +45,32 @@ export default function Swap() {
 
   const handleChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTokenOneAmount(e.target.value);
-    // TODO: Call backend for quote (e.g., fetch(`/api/quote?from=${tokenOne?.address}&to=${tokenTwo?.address}&amount=${e.target.value}`))
+
+    if(e.target.value && prices) { //if we are changing the amount and there is data to look at it with
+        setTokenTwoAmount((Number(e.target.value) * prices.ratio).toFixed(2))
+
+    }else{
+        setTokenTwoAmount("")
+    }
+
   };
 
+
+  const fetchPrices = async (one: string, two: string) => {
+    
+    const res = await backendAPI.getTokenPrices(one,two)
+
+    console.log(res)
+    setPrices(res)
+  }
+
+
+  useEffect(() => {
+    if(tokenOne != null && tokenTwo != null){
+        fetchPrices(tokenOne.address,tokenTwo.address).then(() => {})
+        setTokenTwoAmount((Number(tokenOneAmount) * prices.ratio).toFixed(2))
+    }
+  },[tokenOne,tokenTwo])
 
   return (
     <div className="flex flex-col space-y-2">

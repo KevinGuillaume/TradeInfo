@@ -27,4 +27,15 @@ export class API {
             console.error('Error getting token balances', err);
         }
     }
+
+    async getTokenPrices(addressOne: string, addressTwo: string) {
+        try{
+            console.log("Getting token prices")
+            const response = await fetch(this.baseURL + `/api/tokenPrice?addressOne=${addressOne}&addressTwo=${addressTwo}`)
+            const data = await response.json()
+            return data
+        } catch (err) {
+            console.error("Error getting token prices for coin addresses")
+        }
+    }
 }
