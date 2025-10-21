@@ -22,6 +22,7 @@ export default function Swap() {
   const [isTokenTwoModalOpen, setIsTokenModalTwoOpen] = useState(false);
   const [prices,setPrices] = useState<any>({})
 
+  // Handles the first token selected
   const handleTokenOneSelect = (token: Token) => {
     setPrices({})
     setTokenOneAmount("")
