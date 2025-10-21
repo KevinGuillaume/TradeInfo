@@ -23,10 +23,16 @@ export default function Swap() {
   const [prices,setPrices] = useState<any>({})
 
   const handleTokenOneSelect = (token: Token) => {
+    setPrices({})
+    setTokenOneAmount("")
+    setTokenTwoAmount("")
     setTokenOne(token);
   };
 
   const handleTokenTwoSelect = (token: Token) => {
+    setPrices({})
+    setTokenOneAmount("")
+    setTokenTwoAmount("")
     setTokenTwo(token);
   };
 
@@ -55,20 +61,15 @@ export default function Swap() {
 
   };
 
-
   const fetchPrices = async (one: string, two: string) => {
-    
     const res = await backendAPI.getTokenPrices(one,two)
-
-    console.log(res)
     setPrices(res)
   }
 
 
   useEffect(() => {
     if(tokenOne != null && tokenTwo != null){
-        fetchPrices(tokenOne.address,tokenTwo.address).then(() => {})
-        setTokenTwoAmount((Number(tokenOneAmount) * prices.ratio).toFixed(2))
+        fetchPrices(tokenOne.address,tokenTwo.address)
     }
   },[tokenOne,tokenTwo])
 
@@ -84,6 +85,7 @@ export default function Swap() {
             value={tokenOneAmount}
             onChange={handleChangeAmount}
             type="number"
+            disabled={!tokenOne}
           />
           <div className="relative">
             <button 
