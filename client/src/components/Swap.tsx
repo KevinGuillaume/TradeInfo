@@ -29,6 +29,7 @@ export default function Swap() {
     setTokenOne(token);
   };
 
+  // Handles the second token selected
   const handleTokenTwoSelect = (token: Token) => {
     setPrices({})
     setTokenOneAmount("")
