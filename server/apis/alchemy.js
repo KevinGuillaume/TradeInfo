@@ -6,7 +6,6 @@ class AlchemyAPI {
 
     constructor(apiKey = process.env.ALCHEMY_API_KEY, baseUrl = 'https://eth-mainnet.g.alchemy.com/v2') {
         console.log('Initializing AlchemyAPI with baseUrl:', baseUrl);
-        console.log('API Key (first 4 chars):', apiKey ? apiKey: 'undefined');
         this.apiKey = apiKey;
         this.baseUrl = `${baseUrl}/${apiKey}`;
     }

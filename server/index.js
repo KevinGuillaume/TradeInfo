@@ -2,6 +2,7 @@ require('dotenv').config({ debug: true }); // Enable dotenv debug
 const express = require('express');
 const cors = require('cors');
 const AlchemyAPI = require('./apis/alchemy');
+const axios = require('axios');
 
 const app = express();
 const PORT = 3005;
@@ -55,5 +56,28 @@ app.get('/api/account-balance/:address', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch account balance', details: err.message });
   }
 });
+
+
+// Get swap quote (using 1inch / still deciding if i want to move it out )
+app.get('/api/quote', async (req, res) => {
+    const { fromTokenAddress, toTokenAddress, amount } = req.query;
+    if (!fromTokenAddress || !toTokenAddress || !amount) {
+      return res.status(400).json({ error: 'Missing parameters: fromTokenAddress, toTokenAddress, amount' });
+    }
+  
+    try {
+      const quoteResponse = await axios.get('https://api.1inch.io/v5.0/1/quote', {
+        params: {
+          fromTokenAddress,
+          toTokenAddress,
+          amount,
+        },
+      });
+      res.json(quoteResponse.data);
+    } catch (err) {
+      console.error('Error fetching quote:', err.message);
+      res.status(500).json({ error: 'Failed to fetch quote' });
+    }
+  });
 
 
