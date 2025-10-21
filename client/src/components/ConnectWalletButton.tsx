@@ -16,7 +16,7 @@ const web3Modal = new Web3Modal({
 export default function App() {
   const dispatch = useAppDispatch()
   const { address, chainId, connected, error } = useAppSelector((state) => state.currentAddress);
-
+  
 
   const connect = async () => {
     try {
