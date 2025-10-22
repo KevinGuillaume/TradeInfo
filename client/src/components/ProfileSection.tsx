@@ -57,7 +57,7 @@ export default function ProfileSection() {
 
 
   return (
-    <div className="pt-16 pb-8 px-4 min-h-screen bg-gray-100">
+    <div className="pt-16 pb-8 px-4 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="text-center py-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-6">Profile</h1>

@@ -1,4 +1,5 @@
 import ProfileSection from "../components/ProfileSection";
+import Sentiment from "../components/Sentiment";
 import Swap from "../components/Swap";
 
 
@@ -6,14 +7,16 @@ export default function HomeDEX() {
 
 
     return (
-        <div className="flex flex-row min-h-screen bg-gray-100">
-          <div className="w-[70%] p-6">
-            <div className="bg-white rounded-lg shadow-md h-full p-6">
-              Container for the swap portion this should be its own component
+        <div className="flex flex-row min-h-screen">
+          <div className="w-[30%] p-6">
+            <div className="rounded-lg shadow-md h-full p-6">
               <Swap />
             </div>
           </div>
-          <div className="w-[30%] p-6">
+          <div className="w-[50%] p-6">
+            <Sentiment />
+          </div>
+          <div className="w-[20%] p-6">
             <ProfileSection />
           </div>
         </div>

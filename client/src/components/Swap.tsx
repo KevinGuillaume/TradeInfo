@@ -3,6 +3,7 @@ import tokenList from '../data/token.json'
 import { backendAPI, type TokenBalance } from '../api';
 import TokenSelectModal from "./modals/TokenSelectModal";
 import { useSendTransaction } from "wagmi"
+import axios from "axios";
 import { sendTransaction } from "@wagmi/core"
 import { useAppSelector } from "../store/hooks";
 
@@ -43,7 +44,6 @@ export default function Swap() {
 
 
   const fetchDexSwap = async () => {
-    
   }
 
 
@@ -116,7 +116,7 @@ export default function Swap() {
         <label className="text-sm text-gray-400 mb-2">You pay</label>
         <div className="flex flex-row items-center space-x-3">
           <input
-            className="flex-1 bg-transparent text-2xl text-white placeholder-gray-500 outline-none"
+            className="flex-1 bg-transparent text-xl text-white placeholder-gray-500 outline-none"
             placeholder="0.0"
             value={tokenOneAmount}
             onChange={handleChangeAmount}
@@ -158,7 +158,7 @@ export default function Swap() {
         <label className="text-sm text-gray-400 mb-2">You receive (estimated)</label>
         <div className="flex flex-row items-center space-x-3">
           <input
-            className="flex-1 bg-transparent text-2xl text-white placeholder-gray-500 outline-none"
+            className="flex-1 bg-transparent text-xl text-white placeholder-gray-500 outline-none"
             placeholder="0.0"
             value={tokenTwoAmount}
             disabled
@@ -187,6 +187,7 @@ export default function Swap() {
       <button
         className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-blue-700 disabled:opacity-50"
         disabled={!tokenOne || !tokenTwo || !tokenOneAmount}
+        onClick={fetchDexSwap}
       >
         Swap
       </button>

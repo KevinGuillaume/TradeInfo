@@ -2,3 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    background-color: #3B4252; /* Nord1: Medium dark gray from Nord palette */
+  }
