@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import tokenList from '../data/token.json'
 import { backendAPI, type TokenBalance } from '../api';
 import TokenSelectModal from "./modals/TokenSelectModal";
+import { useSendTransaction } from "wagmi"
+import { sendTransaction } from "@wagmi/core"
+import { useAppSelector } from "../store/hooks";
 
 // This is shape of our token from the json list 
 interface Token {
@@ -13,6 +16,7 @@ interface Token {
 }
 
 export default function Swap() {
+  const { address, connected } = useAppSelector((state) => state.currentAddress);
   const [tokenOneAmount, setTokenOneAmount] = useState<string>("");
   const [tokenTwoAmount, setTokenTwoAmount] = useState<string>("");
   const [tokenOne, setTokenOne] = useState<Token | null>(null);
@@ -21,6 +25,27 @@ export default function Swap() {
   const [isTokenOneModalOpen, setIsTokenOneModalOpen] = useState(false);
   const [isTokenTwoModalOpen, setIsTokenModalTwoOpen] = useState(false);
   const [prices,setPrices] = useState<any>({})
+  const [txDetails,setTxDetails] = useState({
+    to: null,
+    data: null,
+    value: null
+  })
+
+
+  const {data, sendTransaction } = useSendTransaction({
+    request: {
+      from: address,
+      to: String(txDetails.to),
+      data: String(txDetails.data),
+      value: String(txDetails.value)
+    }
+  })
+
+
+  const fetchDexSwap = async () => {
+    
+  }
+
 
   // Handles the first token selected
   const handleTokenOneSelect = (token: Token) => {
@@ -51,6 +76,14 @@ export default function Swap() {
   useEffect(() => {
     setTokens(tokenList)
   }, []);
+
+  useEffect(() => {
+    if(txDetails.to && connected){
+      //@TODO Finish sending transaction
+      sendTransaction()
+    }
+
+  }, [txDetails])
 
   const handleChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTokenOneAmount(e.target.value);
@@ -88,7 +121,7 @@ export default function Swap() {
             value={tokenOneAmount}
             onChange={handleChangeAmount}
             type="number"
-            disabled={!tokenOne}
+            disabled={!prices}
           />
           <div className="relative">
             <button 
