@@ -2,6 +2,7 @@ require('dotenv').config({ debug: true }); // Enable dotenv debug
 const express = require('express');
 const cors = require('cors');
 const AlchemyAPI = require('./apis/alchemy');
+const ZeroXAPI = require('./apis/0x')
 const Moralis = require("moralis").default
 const axios = require('axios');
 
@@ -31,6 +32,7 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 const alchemyApi = new AlchemyAPI();
+const zeroXApi = new ZeroXAPI();
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -85,3 +87,57 @@ app.get('/api/tokenPrice', async (req,res) => {
     return res.status(200).json(usdPrices)
 })
 
+app.get('/api/gasless/price', async (req, res) => {
+  const { sellToken, buyToken, chainId } = req.query;
+  if (!sellToken || !buyToken || !chainId) {
+      return res.status(400).json({ error: 'Missing required query parameters: sellToken, buyToken, chainId' });
+  }
+  console.log(`Fetching gasless price for sellToken: ${sellToken}, buyToken: ${buyToken}, chainId: ${chainId}`);
+  try {
+      const priceData = await zeroXApi.getGaslessPrice(sellToken, buyToken, chainId);
+      console.log('Gasless price response:', priceData);
+      res.json(priceData);
+  } catch (err) {
+      console.error(`Error fetching gasless price:`, err.message);
+  }
+});
+
+
+app.get('/api/gasless/quote', async (req, res) => {
+  const { sellToken, buyToken, sellAmount, taker, chainId, slippagePercentage } = req.query;
+  if (!sellToken || !buyToken || !sellAmount || !taker || !chainId || !slippagePercentage) {
+      return res.status(400).json({ error: 'Missing required query parameters' });
+  }
+  console.log(`Fetching gasless quote for sellToken: ${sellToken}, buyToken: ${buyToken}, sellAmount: ${sellAmount}`);
+  try {
+      const quoteData = await zeroXApi.getGaslessQuote({
+          sellToken,
+          buyToken,
+          sellAmount,
+          taker,
+          chainId,
+          slippagePercentage,
+      });
+      console.log('Gasless quote response:', quoteData);
+      res.json(quoteData);
+  } catch (err) {
+      console.error(`Error fetching gasless quote:`, err.message);
+      res.status(500).json({ error: 'Failed to fetch gasless quote', details: err.message });
+  }
+});
+
+app.post('/api/gasless/submit', async (req, res) => {
+    const { quoteId, signature, chainId } = req.body;
+    if (!signature || !chainId) {
+        return res.status(400).json({ error: 'Missing required body parameters: signature, chainId' });
+    }
+    console.log(`Submitting gasless transaction for chainId: ${chainId}`);
+    try {
+        const submitData = await zeroXApi.submitGaslessTx({ quoteId, signature, chainId });
+        console.log('Gasless submit response:', submitData);
+        res.json(submitData);
+    } catch (err) {
+        console.error(`Error submitting gasless transaction:`, err.message);
+        res.status(500).json({ error: 'Failed to submit gasless transaction', details: err.message });
+    }
+});

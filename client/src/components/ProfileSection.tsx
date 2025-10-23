@@ -1,11 +1,12 @@
-import { useAppSelector } from '../store/hooks';
 import { backendAPI, type TokenBalance } from '../api';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
+import { useAccount, useChainId } from 'wagmi';
 
 
 export default function ProfileSection() {
-    const { address, chainId, connected, error } = useAppSelector((state) => state.currentAddress);
+    const { address, isConnected } = useAccount();
+    const chainId = useChainId()
     const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export default function ProfileSection() {
   // Fetch balances when address or chainId changes
   useEffect(() => {
     if (address && chainId) {
-      fetchTokenBalances(address, chainId);
+      fetchTokenBalances(address, 1);
       fetchWalletInfo(address,chainId)
     } else {
       setTokenBalances([]); // Clear balances if no address
@@ -60,34 +61,31 @@ export default function ProfileSection() {
     <div className="pt-16 pb-8 px-4 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="text-center py-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-6">Profile</h1>
-          {!connected || !address ? (
-            <p className="text-lg text-gray-500">
+          <h1 className="text-4xl font-bold text-gray-400 mb-6">Profile</h1>
+          {!isConnected || !address ? (
+            <p className="text-lg text-gray-400">
               Please connect your wallet to view your profile.
             </p>
           ) : (
             <div>
               <div className="flex items-center justify-center space-x-2">
-                <p className="text-xl text-gray-700 font-mono truncate">{address}</p>
-                <button
+                <p className="text-xl text-gray-400 font-mono truncate">{address}</p>
+                {/* <button
                     onClick={() => navigator.clipboard.write(address)}
-                    className="p-1 text-gray-500 hover:text-blue-500"
+                    className="p-1 text-gray-400 hover:text-blue-500"
                     title="Copy address"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                </button>
+                </button> */}
                 </div>
-                <p className="text-xl text-gray-700 mb-4">Network: {chainName} (Chain ID: {chainId})</p>
+                <p className="text-xl text-gray-400 mb-4">Network: {chainName} (Chain ID: {chainId})</p>
                 {ethBalance && (
-                    <p className="text-xl text-gray-700 mb-4">
+                    <p className="text-xl text-gray-400 mb-4">
                         ETH Balance: {Number(ethBalance).toFixed(4)} ETH
                     </p>
                     )}
-              {error && (
-                <p className="text-red-500 text-base mb-4">{error}</p>
-              )}
               <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-4">
                 Token Balances
               </h2>
