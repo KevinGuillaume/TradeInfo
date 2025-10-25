@@ -23,6 +23,7 @@ class ZeroXAPI {
                 headers: {
                     'Content-Type': 'application/json',
                     '0x-api-key': this.apiKey,
+                    "0x-version": "v2",
                 },
             };
             if (body && (method === 'POST' || method === 'PUT')) {
