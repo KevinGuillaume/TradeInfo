@@ -127,17 +127,17 @@ app.get('/api/gasless/quote', async (req, res) => {
 });
 
 app.post('/api/gasless/submit', async (req, res) => {
-    const { quoteId, signature, chainId } = req.body;
-    if (!signature || !chainId) {
-        return res.status(400).json({ error: 'Missing required body parameters: signature, chainId' });
-    }
-    console.log(`Submitting gasless transaction for chainId: ${chainId}`);
-    try {
-        const submitData = await zeroXApi.submitGaslessTx({ quoteId, signature, chainId });
-        console.log('Gasless submit response:', submitData);
-        res.json(submitData);
-    } catch (err) {
-        console.error(`Error submitting gasless transaction:`, err.message);
-        res.status(500).json({ error: 'Failed to submit gasless transaction', details: err.message });
-    }
+  const { trade, approval, chainId } = req.body;
+  if (!trade || !chainId) {
+    return res.status(400).json({ error: 'Missing required body parameters: trade, chainId' });
+  }
+  console.log('Submitting gasless transaction:', { trade, approval, chainId });
+  try {
+    const submitData = await zeroXApi.submitGaslessTx({ trade, approval, chainId });
+    console.log('Gasless submit response:', submitData);
+    res.json(submitData);
+  } catch (err) {
+    console.error('Error submitting gasless transaction:', err.message);
+    res.status(500).json({ error: 'Failed to submit gasless transaction', details: err.message });
+  }
 });
