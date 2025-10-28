@@ -4,47 +4,9 @@ interface GaslessQuoteParams {
     sellAmount: string; // 0x expects stringified BigInt
     taker: string;      // wallet address
     chainId: number;
-    slippagePercentage: string; // e.g., "0.5" for 0.5%
-}
+    slippagePercentage: string; 
+} 
 
-  interface GaslessQuoteResponse {
-    type: string;
-    quoteId?: string;
-    buyAmount: string;
-    sellAmount: string;
-    allowanceTarget: string;
-    metaTransaction: {
-      domain: Record<string, any>;
-      types: Record<string, any>;
-      primaryType: string;
-      message: Record<string, any>;
-    };
-    approval?: {
-      domain: Record<string, any>;
-      types: Record<string, any>;
-      primaryType: string;
-      message: Record<string, any>;
-    };
-    supportsGaslessApproval: boolean;
-    issues?: {
-      allowance?: { amount: string };
-    };
-}
-
-interface SubmitGaslessTxParams {
-    signature: string;     // EIP-712 signature (hex string)
-    chainId: number;       // e.g., 1 for Ethereum mainnet
-    quoteId?: string;      // optional, required by some 0x backends
-}
-
-interface SubmitGaslessTxResponse {
-    transactionHash: string;   // Tx hash of the relayed transaction
-    status: string;            // e.g., "submitted", "success"
-    // Optional fields from 0x
-    quoteId?: string;
-    gasPrice?: string;
-    gasUsed?: string;
-}
 export class API {
     private baseURL: string
 
@@ -88,8 +50,8 @@ export class API {
     async getGaslessQuote({sellToken,buyToken,sellAmount,taker,chainId,slippagePercentage}: GaslessQuoteParams) {
         try{
             console.log("Getting gasless quote")
-            const response = await fetch(this.baseURL + `/api/gasless/quote?sellToken=${sellToken}
-                &buyToken=${buyToken}&sellAmount=${sellAmount}&taker=${taker}&chainId=${chainId}&slippagePercentage=${slippagePercentage}`)
+            const response = await fetch(this.baseURL + 
+                `/api/gasless/quote?sellToken=${sellToken}&buyToken=${buyToken}&sellAmount=${sellAmount}&taker=${taker}&chainId=${chainId}&slippagePercentage=${slippagePercentage}`)
             const data = await response.json()
             return data
         } catch (err) {
@@ -97,18 +59,22 @@ export class API {
         }
     }
 
-    async submitGaslessTx({ signature, chainId,quoteId,}: SubmitGaslessTxParams){
+    async submitGaslessTx(body: any ){
+        console.log('Submitting trade:', JSON.stringify(body, null, 2))
         const res = await fetch(`${this.baseURL}/api/gasless/submit`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ signature, chainId, quoteId }),
-          });
-      
-          if (!res.ok) {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.message || "Failed to submit gasless transaction");
-          }
-      
-          return res.json();
-    }
+            const error = new Error(
+            `Failed to submit trade: ${err.message || res.statusText}`
+            );
+            (error as any).data = err;
+            throw error;
+        }
+
+        return res.json();
+        }
 }

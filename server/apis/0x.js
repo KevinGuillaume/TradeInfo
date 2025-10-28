@@ -36,9 +36,14 @@ class ZeroXAPI {
                 return this.request(endpoint, method, params, body, retries - 1);
             }
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
-            }
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Error data:', JSON.stringify(errorData, null, 2)); // Log full error
+                throw new Object({
+                    status: response.status,
+                    message: errorData.message || 'Unknown error',
+                    data: errorData,
+                });
+                }
             return await response.json();
         } catch (err) {
             if (retries > 0) {
@@ -46,6 +51,7 @@ class ZeroXAPI {
                 await new Promise((resolve) => setTimeout(resolve, 1000));
                 return this.request(endpoint, method, params, body, retries - 1);
             }
+            console.log(err)
             throw err;
         }
     }
@@ -59,6 +65,8 @@ class ZeroXAPI {
     }
 
     async submitGaslessTx(body) {
+        console.log("Body:")
+        console.log(body)
         return this.request('/gasless/submit', 'POST', {}, body);
     }
 }
