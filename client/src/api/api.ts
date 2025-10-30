@@ -76,5 +76,11 @@ export class API {
         }
 
         return res.json();
-        }
+    }
+
+    async getPortfolioPnL(address: string, days = 7): Promise<any> {
+        const res = await fetch(`${this.baseURL}/api/portfolio/pnl?address=${address}&days=${days}`);
+        if (!res.ok) throw new Error('PnL fetch failed');
+        return res.json();
+    }
 }

@@ -1,5 +1,5 @@
+import PortfolioTracker from "../components/PortfolioTracker";
 import ProfileSection from "../components/ProfileSection";
-import Sentiment from "../components/Sentiment";
 import Swap from "../components/Swap";
 
 
@@ -14,7 +14,7 @@ export default function HomeDEX() {
             </div>
           </div>
           <div className="w-[50%] p-6">
-            <Sentiment />
+            <PortfolioTracker />
           </div>
           <div className="w-[20%] p-6">
             <ProfileSection />

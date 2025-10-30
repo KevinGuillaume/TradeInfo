@@ -103,6 +103,11 @@ app.get('/api/gasless/price', async (req, res) => {
 });
 
 
+/*****************
+ * 
+ * Swap related endpoints 
+ *****************/
+
 app.get('/api/gasless/quote', async (req, res) => {
   const { sellToken, buyToken, sellAmount, taker, chainId, slippagePercentage } = req.query;
   if (!sellToken || !buyToken || !sellAmount || !taker || !chainId || !slippagePercentage) {
@@ -139,5 +144,21 @@ app.post('/api/gasless/submit', async (req, res) => {
   } catch (err) {
     console.error('Error submitting gasless transaction:', err.message);
     res.status(500).json({ error: 'Failed to submit gasless transaction', details: err.message });
+  }
+});
+
+
+/*****************
+ * 
+ * Etc
+ *****************/
+app.get('/api/portfolio/pnl', async (req, res) => {
+  const { address, days = 7 } = req.query;
+  try {
+    // Call Moralis or Oku Trade API still deciding
+    const pnl = await Moralis.EvmApi.account.getPortfolio({ address, chain: 'eth', days });
+    res.json(pnl);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
