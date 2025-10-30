@@ -13,10 +13,10 @@ export interface Transaction {
 
 export interface TokenBalance {
   contractAddress: string;
-  tokenName: string;
-  tokenSymbol: string;
+  name: string;
+  symbol: string;
   balance: string;
-  logo: string | null;
+  logo?: string | null;
   decimals: string | number;
 }
 

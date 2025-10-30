@@ -43,26 +43,57 @@ app.get('/api/health', (req, res) => {
 // Get token balances
 app.get('/api/token-balances/:address', async (req, res) => {
   console.log(`Fetching token balances for address: ${req.params.address}`);
+  const { address } = req.params;
+  console.log(`Fetching token balances for address: ${address}`);
+
   try {
-    const balances = await alchemyApi.getTokenBalances(req.params.address);
-    console.log('Token balances response:', balances);
-    res.json(balances);
+    const response = await Moralis.EvmApi.token.getWalletTokenBalances({
+      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,          // or EvmChain.POLYGON, etc.
+      address,
+      // optional filters
+      excludeSpam: true,
+    });
+
+    // `response.raw` = plain JSON array of token objects
+    const balances = response.raw.map(t => ({
+      contractAddress: t.token_address,
+      name: t.name,
+      symbol: t.symbol,
+      decimals: Number(t.decimals),
+      balance: t.balance,               // raw amount (wei-like)
+      // optional: you can add USD price later with getTokenPrice
+    }));
+
+    res.json({ balances });
   } catch (err) {
-    console.error(`Error fetching token balances for ${req.params.address}:`, err.message);
-    res.status(500).json({ error: 'Failed to fetch token balances', details: err.message });
+    console.error(`Error fetching token balances for ${address}:`, err);
+    res
+      .status(500)
+      .json({ error: 'Failed to fetch token balances', details: err.message });
   }
 });
 
 // Get account balance (ETH)
 app.get('/api/account-balance/:address', async (req, res) => {
-  console.log(`Fetching account balance for address: ${req.params.address}`);
+  const { address } = req.params;
+  console.log(`Fetching native balance for address: ${address}`);
+
   try {
-    const balance = await alchemyApi.getAccountBalance(req.params.address);
-    console.log('Account balance response:', balance);
-    res.json({ balance });
+    const response = await Moralis.EvmApi.balance.getNativeBalance({
+      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
+      address,
+    });
+
+    // `response.raw.balance` is a string in wei
+    const balanceWei = response.raw.balance;
+    const balanceEth = Number(balanceWei) / 1e18; // convert to ETH
+
+    res.json({ balance: balanceEth.toFixed(6) });
   } catch (err) {
-    console.error(`Error fetching account balance for ${req.params.address}:`, err.message);
-    res.status(500).json({ error: 'Failed to fetch account balance', details: err.message });
+    console.error(`Error fetching native balance for ${address}:`, err);
+    res
+      .status(500)
+      .json({ error: 'Failed to fetch native balance', details: err.message });
   }
 });
 
@@ -95,7 +126,6 @@ app.get('/api/gasless/price', async (req, res) => {
   console.log(`Fetching gasless price for sellToken: ${sellToken}, buyToken: ${buyToken}, chainId: ${chainId}`);
   try {
       const priceData = await zeroXApi.getGaslessPrice(sellToken, buyToken, chainId);
-      console.log('Gasless price response:', priceData);
       res.json(priceData);
   } catch (err) {
       console.error(`Error fetching gasless price:`, err.message);
@@ -123,7 +153,6 @@ app.get('/api/gasless/quote', async (req, res) => {
           chainId,
           slippagePercentage,
       });
-      console.log('Gasless quote response:', quoteData);
       res.json(quoteData);
   } catch (err) {
       console.error(`Error fetching gasless quote:`, err.message);
@@ -139,7 +168,6 @@ app.post('/api/gasless/submit', async (req, res) => {
   console.log('Submitting gasless transaction:', { trade, approval, chainId });
   try {
     const submitData = await zeroXApi.submitGaslessTx({ trade, approval, chainId });
-    console.log('Gasless submit response:', submitData);
     res.json(submitData);
   } catch (err) {
     console.error('Error submitting gasless transaction:', err.message);
@@ -156,9 +184,12 @@ app.get('/api/portfolio/pnl', async (req, res) => {
   const { address, days = 7 } = req.query;
   try {
     // Call Moralis or Oku Trade API still deciding
-    const pnl = await Moralis.EvmApi.account.getPortfolio({ address, chain: 'eth', days });
+    console.log("*********Trying to get pnl")
+    const pnl = await Moralis.EvmApi.wallets.getWalletNetWorth({ address, days: 7 });
+    console.log(pnl.json())
     res.json(pnl);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: err.message });
   }
 });

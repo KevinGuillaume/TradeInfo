@@ -35,7 +35,7 @@ export default function ProfileSection() {
         const balances: any = await backendAPI.getTokenBalances(address);
         console.log("balances: ", balances)
 
-        setTokenBalances(balances);
+        setTokenBalances(balances.balances);
     } catch (err) {
         console.error('Error fetching token balances:', err);
         setApiError('Failed to fetch token balances. Please try again.');
@@ -118,17 +118,17 @@ export default function ProfileSection() {
                 <ul className="max-w-md mx-auto bg-white rounded-lg shadow-md">
                   {tokenBalances.map((token) => (
                     <li
-                      key={token.tokenSymbol}
+                      key={token.symbol}
                       className="flex items-center p-4 border-b last:border-b-0 hover:bg-gray-50"
                     >
                       <img
                         src={token.logo || 'https://via.placeholder.com/40?text=Token'}
-                        alt={`${token.tokenName} logo`}
+                        alt={`${token.name} logo`}
                         className="w-10 h-10 rounded-full mr-4"
                       />
                       <div className="flex-1">
                         <p className="text-base font-medium text-gray-800">
-                          {token.tokenName} ({token.tokenSymbol})
+                          {token.name} ({token.symbol})
                         </p>
                         <p className="text-sm text-gray-600">
                           {Number(ethers.formatUnits(token.balance, Number(token.decimals))).toFixed(4)}
