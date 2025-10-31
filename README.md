@@ -1,7 +1,8 @@
 # Goal
-Making a dex based on prediction market trends lets see how this goes. Locking in on this idea fr this time
+Making a dex. Locking in on this idea fr this time
 
-Want to integrate another api like polymarket to see if I can pull data from there
+Trying to see what information can be pulled from different apis.
+So far looking at pnl to see what trades a user should make to help rebalance their port.
 
 ## Tech Stack
 This is what I used
@@ -13,9 +14,8 @@ This is what I used
 
 ### Backend
 * Node.js w/ express for the backend
-* Solidity
 * Bunch of api's to help
-*   Alchemy api
+*   0x api
 *   Moralis api 
 
 
