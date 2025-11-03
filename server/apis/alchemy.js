@@ -35,10 +35,6 @@ class AlchemyAPI {
         }
         return data.result;
       } catch (err) {
-        if (retries > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          return this.request(method, params, retries - 1);
-        }
         throw err;
       }
     }

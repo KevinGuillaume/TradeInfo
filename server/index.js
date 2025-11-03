@@ -48,7 +48,7 @@ app.get('/api/token-balances/:address', async (req, res) => {
 
   try {
     const response = await Moralis.EvmApi.token.getWalletTokenBalances({
-      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,          // or EvmChain.POLYGON, etc.
+      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
       address,
       // optional filters
       excludeSpam: true,
@@ -60,8 +60,8 @@ app.get('/api/token-balances/:address', async (req, res) => {
       name: t.name,
       symbol: t.symbol,
       decimals: Number(t.decimals),
-      balance: t.balance,               // raw amount (wei-like)
-      // optional: you can add USD price later with getTokenPrice
+      balance: t.balance,              
+
     }));
 
     res.json({ balances });
@@ -180,16 +180,158 @@ app.post('/api/gasless/submit', async (req, res) => {
  * 
  * Etc
  *****************/
-app.get('/api/portfolio/pnl', async (req, res) => {
-  const { address, days = 7 } = req.query;
+  // ──────────────────────────────────────────────────────────────
+//  Rebalance Suggestions – Moralis SDK version
+// ──────────────────────────────────────────────────────────────
+app.get('/api/rebalance-suggestions', async (req, res) => {
   try {
-    // Call Moralis or Oku Trade API still deciding
-    console.log("*********Trying to get pnl")
-    const pnl = await Moralis.EvmApi.wallets.getWalletNetWorth({ address, days: 7 });
-    console.log(pnl.json())
-    res.json(pnl);
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: err.message });
+    const { userAddress } = req.query;
+    if (!userAddress) return res.status(400).json({ error: 'userAddress required' });
+
+    // ────── 1. Fetch Holdings via Moralis SDK ──────
+    // ────── 1. Fetch Holdings via Moralis SDK (with USD prices) ──────
+    console.log("Fetching token balances...");
+
+    const tokenBalancesResponse = await Moralis.EvmApi.token.getWalletTokenBalances({
+      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
+      address: userAddress,
+      excludeSpam: true,
+    });
+
+    const rawTokens = tokenBalancesResponse.raw;
+
+    // Fetch USD price for each token
+    const holdingsWithPrice = await Promise.all(
+      rawTokens.map(async (t) => {
+        let usdValue = 0;
+        try {
+          const priceResponse = await Moralis.EvmApi.token.getTokenPrice({
+            address: t.token_address,
+          });
+          const price = parseFloat(priceResponse.raw.usdPrice || '0');
+          const balance = parseFloat(t.balance_formatted || '0');
+          usdValue = price * balance;
+        } catch (err) {
+          console.warn(`Price fetch failed for ${t.symbol}:`, err);
+        }
+
+        return {
+          address: t.token_address.toLowerCase(),
+          symbol: t.symbol,
+          name: t.name,
+          usdValue,
+          quantity: parseFloat(t.balance_formatted || '0'),
+          decimals: t.decimals,
+        };
+      })
+    );
+
+    // Filter out low-value and spam
+    const holdings = holdingsWithPrice
+      .filter((h) => h.usdValue > 50) // $50 min
+      .sort((a, b) => b.usdValue - a.usdValue);
+
+    const totalValue = holdings.reduce((sum, h) => sum + h.usdValue, 0);
+
+    console.log(`Found ${holdings.length} holdings worth $${totalValue.toFixed(2)}`);
+
+    // ────── 2. Fetch Top Pools from Icarus Tools (GET, no body) ──────
+    console.log("Fetching top pools from Icarus Tools...");
+
+    const icarusUrl = new URL('https://omni.icarus.tools/ethereum/cush/topPools');
+    icarusUrl.searchParams.append('limit', '50');           // Max 50
+    icarusUrl.searchParams.append('orderBy', 'total_fees_usd_desc'); // Highest yield
+    icarusUrl.searchParams.append('minTvl', '100000');      // $100k+
+
+    const icarusRes = await fetch(icarusUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; RebalancerBot/1.0)',
+      },
+    });
+
+    if (!icarusRes.ok) {
+      const err = await icarusRes.text();
+      console.error('Icarus HTTP Error:', icarusRes.status, err.slice(0, 200));
+      throw new Error(`Icarus API error: ${icarusRes.status}`);
+    }
+
+    const icarusData = await icarusRes.json();
+
+    if (!icarusData.result?.pools) {
+      console.error('Unexpected Icarus response:', icarusData);
+      throw new Error('Invalid response from Icarus Tools');
+    }
+
+    // ────── 3. Map & Compute APY ──────
+    const poolsWithApy = icarusData.result.pools
+      .filter((p) => p.tvl_usd > 100_000 && p.total_fees_usd > 0)
+      .map((p) => {
+        const apy = ((p.total_fees_usd / p.tvl_usd) * 365 * 100).toFixed(2) + '%';
+
+        return {
+          id: p.address,
+          token0: {
+            address: p.t0.toLowerCase(),
+            symbol: p.t0_symbol,
+            name: p.t0_name,
+          },
+          token1: {
+            address: p.t1.toLowerCase(),
+            symbol: p.t1_symbol,
+            name: p.t1_name,
+          },
+          fee: p.fee, // e.g., 3000 = 0.3%
+          tvl_usd: p.tvl_usd,
+          total_fees_usd: p.total_fees_usd,
+          volume_usd: p.t0_volume_usd + p.t1_volume_usd,
+          apy,
+          risk: p.tvl_usd > 5_000_000 ? 'Low' : p.tvl_usd > 1_000_000 ? 'Medium' : 'High',
+        };
+      });
+
+    console.log(`Fetched ${poolsWithApy.length} high-yield pools`);
+
+    // ────── 4. Generate LP Suggestions ──────
+    const suggestions = [];
+
+    holdings.forEach((h) => {
+      const matches = poolsWithApy
+        .filter((p) =>
+          [p.token0.address, p.token1.address].includes(h.address)
+        )
+        .slice(0, 2); // Max 2 per token
+
+      matches.forEach((pool) => {
+        const amountUsd = Math.min(h.usdValue * 0.3, 5_000); // 30% or $5k max
+
+        suggestions.push({
+          type: 'lp',
+          title: `Earn ${pool.apy} APY on ${pool.token0.symbol}/${pool.token1.symbol}`,
+          description: `Add $${amountUsd.toFixed(0)} to this Uniswap v3 pool (TVL: $${pool.tvl_usd.toLocaleString()})`,
+          action: {
+            type: 'link',
+            url: `https://oku.trade/pool/${pool.id}`, // Works if pool is on Oku
+          },
+          apy: pool.apy,
+          risk: pool.risk,
+        });
+      });
+    });
+    console.log("Suggestions: ",suggestions)
+    // ────── Optional: Add Swap/Stake/AI (from before) ──────
+    // ... keep your existing swap, Yearn, AI logic ...
+
+    // ────── Final Response ──────
+    res.json({
+      suggestions: suggestions.slice(0, 8),
+      totalPortfolio: totalValue,
+      refreshedAt: new Date().toISOString(),
+      source: 'Icarus Tools + Moralis',
+    });
+  } catch (error) {
+    console.error('Rebalance error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });

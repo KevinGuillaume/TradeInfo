@@ -46,11 +46,6 @@ class ZeroXAPI {
                 }
             return await response.json();
         } catch (err) {
-            if (retries > 0) {
-                console.log(`Request failed, retrying... (${retries} retries left)`);
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                return this.request(endpoint, method, params, body, retries - 1);
-            }
             console.log(err)
             throw err;
         }
