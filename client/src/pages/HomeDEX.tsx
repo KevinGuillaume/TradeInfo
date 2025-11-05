@@ -1,11 +1,9 @@
-import PortfolioTracker from "../components/PortfolioTracker";
 import ProfileSection from "../components/ProfileSection";
+import Rebalancer from "../components/Rebalancer";
 import Swap from "../components/Swap";
 
 
 export default function HomeDEX() {
-
-
     return (
         <div className="flex flex-row min-h-screen">
           <div className="w-[30%] p-6">
@@ -14,7 +12,7 @@ export default function HomeDEX() {
             </div>
           </div>
           <div className="w-[50%] p-6">
-            <PortfolioTracker />
+            <Rebalancer />
           </div>
           <div className="w-[20%] p-6">
             <ProfileSection />
