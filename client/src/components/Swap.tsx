@@ -85,7 +85,7 @@ const formatSignatureFor0x = (signature: string) => {
         sellAmount,
         taker: address,
         chainId: 1,
-        slippagePercentage: "0.5", // 0.5% slippage prob gonna make this a setting in the swap UI
+        slippagePercentage: "0.25", // 0.5% slippage prob gonna make this a setting in the swap UI
       });
   
       if (quote.trade.type !== 'settler_metatransaction') {

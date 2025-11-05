@@ -78,9 +78,11 @@ export class API {
         return res.json();
     }
 
-    async getPortfolioPnL(address: string, days = 7): Promise<any> {
-        const res = await fetch(`${this.baseURL}/api/portfolio/pnl?address=${address}&days=${days}`);
-        if (!res.ok) throw new Error('PnL fetch failed');
-        return res.json();
+    async getRebalanceSuggestions(address: string) {
+        const res = await fetch(`${this.baseURL}/api/rebalance-suggestions?userAddress=${address}`);
+        if (!res.ok) throw new Error('Rebalance fetch failed');
+        const ans = await res.json()
+        console.log("Rebalance summary: ", ans)
+        return ans;
     }
 }
