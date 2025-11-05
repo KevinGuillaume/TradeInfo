@@ -209,7 +209,7 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
             address: t.token_address,
           });
           const price = parseFloat(priceResponse.raw.usdPrice || '0');
-          const balance = parseFloat(t.balance_formatted || '0');
+          const balance = parseFloat(t.balance|| '0');
           usdValue = price * balance;
         } catch (err) {
           console.warn(`Price fetch failed for ${t.symbol}:`, err);
