@@ -312,7 +312,7 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
           description: `Add $${amountUsd.toFixed(0)} to this Uniswap v3 pool (TVL: $${pool.tvl_usd.toLocaleString()})`,
           action: {
             type: 'link',
-            url: `https://oku.trade/pool/${pool.id}`, // Works if pool is on Oku
+            url: `https://oku.trade/uniswap/v3/pool/ethereum/${pool.id}`, // Works if pool is on Oku
           },
           apy: pool.apy,
           risk: pool.risk,
