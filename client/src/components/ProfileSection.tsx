@@ -58,90 +58,92 @@ export default function ProfileSection() {
 
 
   return (
-    <div className="pt-16 pb-8 px-4 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-8">
-          <h1 className="text-4xl font-bold text-gray-400 mb-6">Profile</h1>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-sm mx-auto">
+        <div className="text-center py-6">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+            Profile
+          </h1>
+  
           {!isConnected || !address ? (
-            <p className="text-lg text-gray-400">
-              Please connect your wallet to view your profile.
-            </p>
+            <div className="py-10">
+              <div className="w-16 h-16 mx-auto bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-400">Connect wallet</p>
+            </div>
           ) : (
-            <div>
-              <div className="flex items-center justify-center space-x-2">
-                <p className="text-xl text-gray-400 font-mono truncate">{address}</p>
-                {/* <button
-                    onClick={() => navigator.clipboard.write(address)}
-                    className="p-1 text-gray-400 hover:text-blue-500"
-                    title="Copy address"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                </button> */}
-                </div>
-                <p className="text-xl text-gray-400 mb-4">Network: {chainName} (Chain ID: {chainId})</p>
-                {ethBalance && (
-                    <p className="text-xl text-gray-400 mb-4">
-                        ETH Balance: {Number(ethBalance).toFixed(4)} ETH
-                    </p>
-                    )}
-              <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-4">
-                Token Balances
-              </h2>
-              {apiError ? (
-                <p className="text-red-500 text-base">{apiError}</p>
-              ) : loading ? (
-                <div className="flex justify-center">
-                  <svg
-                    className="animate-spin h-8 w-8 text-blue-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+            <div className="space-y-4">
+              {/* Address */}
+              <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl p-4 border border-gray-700">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-mono text-xs text-gray-300 truncate">
+                    {address.slice(0, 10)}...{address.slice(-8)}
+                  </p>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(address)}
+                    className="p-2 bg-gray-700/50 rounded-lg hover:bg-gray-600 transition"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
                 </div>
-              ) : tokenBalances.length > 0 ? (
-                <ul className="max-w-md mx-auto bg-white rounded-lg shadow-md">
-                  {tokenBalances.map((token) => (
-                    <li
-                      key={token.symbol}
-                      className="flex items-center p-4 border-b last:border-b-0 hover:bg-gray-50"
-                    >
-                      <img
-                        src={token.logo || 'https://via.placeholder.com/40?text=Token'}
-                        alt={`${token.name} logo`}
-                        className="w-10 h-10 rounded-full mr-4"
-                      />
-                      <div className="flex-1">
-                        <p className="text-base font-medium text-gray-800">
-                          {token.name} ({token.symbol})
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {Number(ethers.formatUnits(token.balance, Number(token.decimals))).toFixed(4)}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-base text-gray-500">
-                  No tokens found or balances are zero.
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{chainName}</p>
+              </div>
+  
+              {/* ETH Balance */}
+              {ethBalance && (
+                <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-2xl p-4 border border-blue-700/30">
+                  <p className="text-xs text-gray-400">ETH Balance</p>
+                  <p className="text-2xl font-bold text-white">
+                    {Number(ethBalance).toFixed(6)}
+                  </p>
+                </div>
               )}
+  
+              {/* Tokens */}
+              <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl p-5 border border-gray-700">
+                <h2 className="text-sm font-bold text-white mb-3">Tokens</h2>
+  
+                {apiError ? (
+                  <p className="text-xs text-red-400 text-center">{apiError}</p>
+                ) : loading ? (
+                  <div className="space-y-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="h-10 bg-gray-700/50 rounded-lg animate-pulse" />
+                    ))}
+                  </div>
+                ) : tokenBalances.length > 0 ? (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {tokenBalances.slice(0, 8).map((token) => (
+                      <div
+                        key={token.symbol}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-700/50 transition"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-gray-600 rounded-full flex-shrink-0" />
+                          <div>
+                            <p className="text-xs font-medium text-white">{token.symbol}</p>
+                            <p className="text-xs text-gray-500">
+                              {Number(ethers.formatUnits(token.balance, Number(token.decimals))).toFixed(4)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {tokenBalances.length > 8 && (
+                      <p className="text-xs text-gray-500 text-center pt-2">
+                        +{tokenBalances.length - 8} more
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center">No tokens</p>
+                )}
+              </div>
             </div>
           )}
         </div>

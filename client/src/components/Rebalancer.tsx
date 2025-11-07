@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { backendAPI } from '../api';
-import { RefreshCw, ExternalLink, ArrowRight } from 'lucide-react';
+import { RefreshCw, ExternalLink, ArrowRight, Sparkles } from 'lucide-react';
 
 interface Suggestion {
   type: 'lp' | 'swap' | 'stake' | 'ai';
@@ -46,75 +46,132 @@ export default function Rebalancer() {
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Rebalancer</h1>
+
+return (
+  <div className="">
+    <div className="max-w-5xl mx-auto p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Rebalancer
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">Smart suggestions to optimize your portfolio</p>
+        </div>
+
         <button
           onClick={fetchSuggestions}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-lg"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
+          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? 'Analyzing...' : 'Refresh'}
         </button>
       </div>
 
       {lastRefresh && (
-        <p className="text-sm text-gray-500 mb-4">Last refreshed: {lastRefresh}</p>
+        <p className="text-sm text-gray-500 mb-8">
+          Last refreshed: {new Date(lastRefresh).toLocaleTimeString()}
+        </p>
       )}
 
+      {/* Loading State */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-200 h-32 rounded-lg"></div>
+            <div
+              key={i}
+              className="animate-pulse bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl h-40"
+            />
           ))}
         </div>
       ) : suggestions.length === 0 ? (
-        <p className="text-center text-gray-600">No suggestions — your portfolio is optimized!</p>
+        <div className="text-center py-20">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-900/30 rounded-full mb-6">
+            <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-xl text-gray-300">Your portfolio is perfectly balanced!</p>
+          <p className="text-gray-500 mt-2">No rebalancing needed right now.</p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        /* Suggestions Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {suggestions.map((s, i) => (
             <div
               key={i}
-              className={`p-5 rounded-xl border ${
-                s.type === 'ai' ? 'bg-purple-50 border-purple-300' : 'bg-white border-gray-200'
-              } shadow-sm hover:shadow-md transition-shadow`}
+              className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${
+                s.type === 'ai'
+                  ? 'bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-500/50 shadow-purple-500/20'
+                  : 'bg-gray-800/60 border-gray-700 shadow-xl'
+              }`}
             >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    {s.type === 'lp' && 'Pool'}
-                    {s.type === 'swap' && 'Swap'}
-                    {s.type === 'stake' && 'Vault'}
-                    {s.type === 'ai' && 'AI Insight'}
-                    {s.apy && <span className="text-green-600 text-sm font-bold">+{s.apy}</span>}
-                  </h3>
-                  <p className="text-gray-700 mt-1">{s.title}</p>
-                  <p className="text-sm text-gray-600 mt-2">{s.description}</p>
-                  {s.risk && (
-                    <span className={`inline-block mt-2 px-2 py-1 text-xs rounded-full ${
-                      s.risk === 'Low' ? 'bg-green-100 text-green-800' :
-                      s.risk === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      Risk: {s.risk}
-                    </span>
-                  )}
+              {s.type === 'ai' && (
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse" />
+              )}
+
+              <div className="relative p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    {s.type === 'lp' && <div className="w-10 h-10 bg-blue-600/30 rounded-xl flex items-center justify-center">Pool</div>}
+                    {s.type === 'swap' && <div className="w-10 h-10 bg-green-600/30 rounded-xl flex items-center justify-center">Swap</div>}
+                    {s.type === 'stake' && <div className="w-10 h-10 bg-yellow-600/30 rounded-xl flex items-center justify-center">Vault</div>}
+                    {s.type === 'ai' && (
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center animate-pulse">
+                        <Sparkles className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+
+                    <div>
+                      <h3 className="font-bold text-lg flex items-center gap-2">
+                        {s.type === 'lp' && 'Liquidity Pool'}
+                        {s.type === 'swap' && 'Smart Swap'}
+                        {s.type === 'stake' && 'Yield Vault'}
+                        {s.type === 'ai' && 'AI Insight'}
+                        {s.apy && (
+                          <span className="text-green-400 font-bold text-sm ml-2">
+                            +{s.apy}
+                          </span>
+                        )}
+                      </h3>
+                    </div>
+                  </div>
                 </div>
+
+                <p className="text-gray-300 font-medium mb-2">{s.title}</p>
+                <p className="text-sm text-gray-400 mb-4 leading-relaxed">{s.description}</p>
+
+                {s.risk && (
+                  <span
+                    className={`inline-block px-3 py-1 text-xs font-medium rounded-full mb-4 ${
+                      s.risk === 'Low'
+                        ? 'bg-green-900/50 text-green-300 border border-green-700'
+                        : s.risk === 'Medium'
+                        ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-700'
+                        : 'bg-red-900/50 text-red-300 border border-red-700'
+                    }`}
+                  >
+                    Risk: {s.risk}
+                  </span>
+                )}
 
                 {s.action && (
                   <button
                     onClick={() => handleAction(s)}
-                    className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-1 text-sm"
+                    className={`w-full mt-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
+                      s.type === 'ai'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                    }`}
                   >
                     {s.action.type === 'link' ? (
                       <>
-                        View <ExternalLink className="w-3 h-3" />
+                        View on Oku <ExternalLink className="w-4 h-4" />
                       </>
                     ) : (
                       <>
-                        Go <ArrowRight className="w-3 h-3" />
+                        Execute Now <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
@@ -125,5 +182,6 @@ export default function Rebalancer() {
         </div>
       )}
     </div>
-  );
+  </div>
+);
 }
