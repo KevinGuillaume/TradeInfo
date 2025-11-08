@@ -319,7 +319,6 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
         });
       });
     });
-    console.log("Suggestions: ",suggestions)
     // ────── Optional: Add Swap/Stake/AI (from before) ──────
     // ... keep your existing swap, Yearn, AI logic ...
 
@@ -333,5 +332,19 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
   } catch (error) {
     console.error('Rebalance error:', error);
     res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+});
+
+app.get('/api/nfts/:address', async (req, res) => {
+  const { address } = req.params;
+  try {
+    const nfts = await Moralis.EvmApi.nft.getWalletNFTs({
+      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
+      address,
+      limit: 50,
+    });
+    res.json({ nfts: nfts.raw.result });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch NFTs' });
   }
 });

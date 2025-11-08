@@ -85,4 +85,12 @@ export class API {
         console.log("Rebalance summary: ", ans)
         return ans;
     }
+
+    async getNFTs(address: string) {
+        const res = await fetch(`${this.baseURL}/api/nfts/${address}`)
+        if (!res.ok) throw new Error('NFT fetch failed');
+        const ans = await res.json()
+        console.log("NFTS: ", ans)
+        return ans;
+    }
 }

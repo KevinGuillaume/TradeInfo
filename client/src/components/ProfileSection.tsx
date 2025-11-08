@@ -3,59 +3,97 @@ import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { useAccount, useChainId } from 'wagmi';
 
+interface NFT {
+  token_address: string;
+  name: string;
+  symbol: string;
+  token_uri?: string;
+  metadata?: any;
+  normalized_metadata?:any
+  amount: string;
+}
 
 export default function ProfileSection() {
-    const { address, isConnected } = useAccount();
-    const chainId = useChainId()
-    const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [apiError, setApiError] = useState<string | null>(null);
-    const [ethBalance, setEthBalance] = useState<string | null>(null);
-    const chainName = chainId === 1 ? 'Ethereum Mainnet' : 'Unknown Network';
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
+  const [nfts, setNfts] = useState<NFT[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingNFTs, setLoadingNFTs] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [ethBalance, setEthBalance] = useState<string | null>(null);
+  const chainName = chainId === 1 ? 'Ethereum Mainnet' : 'Unknown Network';
 
-    const fetchWalletInfo = async (address: string, chainId: number) => {
-        if (!address || chainId !== 1) return;
-        try {
-          const balance: any = await backendAPI.getAccountBalance(address);
-          setEthBalance(balance.balance);
-        } catch (err) {
-          setApiError('Failed to fetch ETH balance.');
-        }
-      };
-
-    const fetchTokenBalances = async (address: string, chainId: number) => {
-    if (!address || chainId !== 1) { // Ensure Ethereum mainnet
-        setApiError(chainId !== 1 ? 'Please switch to Ethereum mainnet' : 'No address provided');
-        return;
-    }
-    setLoading(true);
-    setApiError(null);
-
+  const fetchWalletInfo = async (address: string) => {
     try {
-        const balances: any = await backendAPI.getTokenBalances(address);
-        console.log("balances: ", balances)
-
-        setTokenBalances(balances.balances);
+      const balance: any = await backendAPI.getAccountBalance(address);
+      setEthBalance(balance.balance);
     } catch (err) {
-        console.error('Error fetching token balances:', err);
-        setApiError('Failed to fetch token balances. Please try again.');
-    } finally {
-        setLoading(false);
+      setApiError('Failed to fetch ETH balance.');
     }
-    };
+  };
 
+  const fetchTokenBalances = async (address: string) => {
+    setLoading(true);
+    try {
+      const balances: any = await backendAPI.getTokenBalances(address);
+      setTokenBalances(balances.balances || []);
+    } catch (err) {
+      setApiError('Failed to fetch token balances.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Fetch balances when address or chainId changes
+  const fetchNFTs = async (address: string) => {
+  setLoadingNFTs(true);
+  try {
+    const data: any = await backendAPI.getNFTs(address);
+
+    const validNFTs = data.nfts
+      .map((nft: any) => {
+        let image = nft.normalized_metadata?.image || '';
+        // if (image.startsWith('ipfs://')) {
+        //   image = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+        // }
+        return {
+          ...nft,
+          image,
+          collectionName: nft.name || nft.normalized_metadata.name || 'Unknown'
+        };
+      })
+      .filter((nft: any) => {
+        if (!nft.normalized_metadata.image) return false;
+        if (nft.possible_spam) return false;
+
+        const name = nft.normalized_metadata.name.toLowerCase();
+        // get rid of the junk.....
+        const spamKeywords = ['claim', 'reward', 'access', 'visit', 'steth', 'prize', 'mysterybox'];
+        if (spamKeywords.some(k => name.includes(k))) return false;
+
+        if (nft.contract_type === 'ERC1155' && !nft.rarity_rank) return false;
+
+        return true;
+      })
+
+    setNfts(validNFTs);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoadingNFTs(false);
+  }
+};
+
   useEffect(() => {
-    if (address && chainId) {
-      fetchTokenBalances(address, 1);
-      fetchWalletInfo(address,chainId)
+    if (address && chainId === 1) {
+      fetchWalletInfo(address);
+      fetchTokenBalances(address);
+      fetchNFTs(address);
     } else {
-      setTokenBalances([]); // Clear balances if no address
-      setApiError(null);
+      setTokenBalances([]);
+      setNfts([]);
     }
   }, [address, chainId]);
-
 
   return (
     <div className="h-full overflow-y-auto">
@@ -64,7 +102,7 @@ export default function ProfileSection() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
             Profile
           </h1>
-  
+
           {!isConnected || !address ? (
             <div className="py-10">
               <div className="w-16 h-16 mx-auto bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700 flex items-center justify-center mb-4">
@@ -93,8 +131,8 @@ export default function ProfileSection() {
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{chainName}</p>
               </div>
-  
-              {/* ETH Balance */}
+
+              {/* ETH */}
               {ethBalance && (
                 <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-2xl p-4 border border-blue-700/30">
                   <p className="text-xs text-gray-400">ETH Balance</p>
@@ -103,45 +141,64 @@ export default function ProfileSection() {
                   </p>
                 </div>
               )}
-  
+
               {/* Tokens */}
               <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl p-5 border border-gray-700">
                 <h2 className="text-sm font-bold text-white mb-3">Tokens</h2>
-  
-                {apiError ? (
-                  <p className="text-xs text-red-400 text-center">{apiError}</p>
-                ) : loading ? (
+                {loading ? (
                   <div className="space-y-2">
-                    {[...Array(4)].map((_, i) => (
+                    {[...Array(3)].map((_, i) => (
                       <div key={i} className="h-10 bg-gray-700/50 rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : tokenBalances.length > 0 ? (
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {tokenBalances.slice(0, 8).map((token) => (
-                      <div
-                        key={token.symbol}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-700/50 transition"
-                      >
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {tokenBalances.slice(0, 6).map((token) => (
+                      <div key={token.symbol} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-700/50 transition">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-gray-600 rounded-full flex-shrink-0" />
-                          <div>
-                            <p className="text-xs font-medium text-white">{token.symbol}</p>
-                            <p className="text-xs text-gray-500">
-                              {Number(ethers.formatUnits(token.balance, Number(token.decimals))).toFixed(4)}
-                            </p>
-                          </div>
+                          <div className="w-6 h-6 bg-gray-600 rounded-full" />
+                          <span className="text-xs text-white">{token.symbol}</span>
                         </div>
+                        <span className="text-xs text-gray-400">
+                          {Number(ethers.formatUnits(token.balance, token.decimals)).toFixed(3)}
+                        </span>
                       </div>
                     ))}
-                    {tokenBalances.length > 8 && (
-                      <p className="text-xs text-gray-500 text-center pt-2">
-                        +{tokenBalances.length - 8} more
-                      </p>
-                    )}
                   </div>
                 ) : (
                   <p className="text-xs text-gray-500 text-center">No tokens</p>
+                )}
+              </div>
+
+              {/* NFTs */}
+              <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl p-5 border border-gray-700">
+                <h2 className="text-sm font-bold text-white mb-3">NFTs ({nfts.length})</h2>
+                {loadingNFTs ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-16 bg-gray-700/50 rounded-lg animate-pulse" />
+                    ))}
+                  </div>
+                ) : nfts.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                    {nfts.map((nft, i) => {
+                      const image = nft.normalized_metadata?.image?.replace?.('ipfs://', 'https://ipfs.io/ipfs/') ||
+                                    'https://via.placeholder.com/64?text=NFT';
+                      return (
+                        <img
+                          key={i}
+                          src={image}
+                          alt={nft.name || 'NFT'}
+                          className="w-full h-16 object-cover rounded-lg border border-gray-700 hover:border-purple-500 transition"
+                          onError={(e) => {
+                            e.currentTarget.src = '#'
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center">No NFTs</p>
                 )}
               </div>
             </div>
