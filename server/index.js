@@ -5,6 +5,7 @@ const AlchemyAPI = require('./apis/alchemy');
 const ZeroXAPI = require('./apis/0x')
 const Moralis = require("moralis").default
 const axios = require('axios');
+const OkuAPI = require('./apis/Oku');
 
 const app = express();
 const PORT = 3005;
@@ -32,6 +33,7 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 const alchemyApi = new AlchemyAPI();
+const OkuApi = new OkuAPI()
 const zeroXApi = new ZeroXAPI();
 
 // Health check endpoint
@@ -177,7 +179,6 @@ app.post('/api/gasless/submit', async (req, res) => {
 
 
 /*****************
- * 
  * Etc
  *****************/
   // ──────────────────────────────────────────────────────────────
@@ -188,7 +189,6 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
     const { userAddress } = req.query;
     if (!userAddress) return res.status(400).json({ error: 'userAddress required' });
 
-    // ────── 1. Fetch Holdings via Moralis SDK ──────
     // ────── 1. Fetch Holdings via Moralis SDK (with USD prices) ──────
     console.log("Fetching token balances...");
 
@@ -237,27 +237,7 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
 
     // ────── 2. Fetch Top Pools from Icarus Tools (GET, no body) ──────
     console.log("Fetching top pools from Icarus Tools...");
-
-    const icarusUrl = new URL('https://omni.icarus.tools/ethereum/cush/topPools');
-    icarusUrl.searchParams.append('limit', '50');           // Max 50
-    icarusUrl.searchParams.append('orderBy', 'total_fees_usd_desc'); // Highest yield
-    icarusUrl.searchParams.append('minTvl', '100000');      // $100k+
-
-    const icarusRes = await fetch(icarusUrl.toString(), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; RebalancerBot/1.0)',
-      },
-    });
-
-    if (!icarusRes.ok) {
-      const err = await icarusRes.text();
-      console.error('Icarus HTTP Error:', icarusRes.status, err.slice(0, 200));
-      throw new Error(`Icarus API error: ${icarusRes.status}`);
-    }
-
-    const icarusData = await icarusRes.json();
+    const icarusData = OkuApi.getTopPools();
 
     if (!icarusData.result?.pools) {
       console.error('Unexpected Icarus response:', icarusData);
