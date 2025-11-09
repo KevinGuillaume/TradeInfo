@@ -8,6 +8,7 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import SwapPage from './pages/SwapPage';
 import NFTPage from './pages/NFTPage';
+import PredictionsPage from './pages/PredictionsPage';
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,8 @@ function App() {
                 <Route path="/" element={<HomeDEX />} />
                 <Route path="/swap" element={<SwapPage />} />
                 <Route path="/nfts" element={<NFTPage />} />
+                <Route path="/predictions" element={<PredictionsPage />} />
+
               </Routes>
             </Router>
           </div>

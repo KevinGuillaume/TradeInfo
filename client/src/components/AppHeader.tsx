@@ -7,6 +7,7 @@ export default function AppHeader() {
     { to: '/', label: 'Home' },
     { to: '/swap', label: 'Swap' },
     { to: '/nfts', label: 'NFTs' },
+    { to: '/predictions', label: 'Prediction' },
   ];
 
   return (
