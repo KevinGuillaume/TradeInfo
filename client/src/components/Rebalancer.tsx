@@ -54,9 +54,9 @@ return (
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Rebalancer
+            Rebalance
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Smart suggestions to optimize your portfolio</p>
+          <p className="text-gray-400 text-sm mt-1">Smart suggestions to optimize your wallet that are based on current pools, activity, and more.</p>
         </div>
 
         <button

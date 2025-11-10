@@ -210,6 +210,14 @@ const formatSignatureFor0x = (signature: string) => {
   return (
     <div className="flex flex-col space-y-2">
       {/* Input Token */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Swap
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">A gasless swap to exchange tokens</p>
+        </div>
+      </div>
       <div className="border border-gray-600 p-4 flex flex-col bg-gray-800/50 backdrop-blur-md rounded-xl">
         <label className="text-sm text-gray-400 mb-2">You pay</label>
         <div className="flex flex-row items-center space-x-3">
@@ -239,14 +247,48 @@ const formatSignatureFor0x = (signature: string) => {
       </div>
 
       {/* Swap Arrow */}
-      <div className="flex justify-center">
-        <button
-          onClick={handleTokenSwap}
-          className="p-2 bg-gray-700/50 rounded-full hover:bg-gray-600/50 transition-colors"
-        >
-          ↕️
-        </button>
-      </div>
+      {/* Premium Spaced Swap Button */}
+<div className="flex justify-center -my-4 z-10">
+  <button
+    onClick={handleTokenSwap}
+    className="group relative p-4 bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-gray-600 hover:border-purple-500/50 shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 hover:scale-110"
+  >
+    <div className="flex flex-col items-center gap-1">
+      {/* Up Arrow */}
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="text-purple-400 group-hover:text-purple-300 transition-colors"
+      >
+        <path d="M7 13l5-5 5 5" />
+      </svg>
+
+      {/* Down Arrow */}
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="text-blue-400 group-hover:text-blue-300 transition-colors"
+      >
+        <path d="M7 11l5 5 5-5" />
+      </svg>
+    </div>
+
+    {/* Subtle glow ring */}
+    <div className="absolute inset-0 rounded-2xl bg-purple-500/20 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-300" />
+  </button>
+</div>
 
       {/* Output Token */}
       <div className="border border-gray-600 p-4 flex flex-col bg-gray-800/50 backdrop-blur-md rounded-xl">
