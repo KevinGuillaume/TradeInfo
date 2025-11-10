@@ -15,28 +15,27 @@ class OkuAPI {
             if (method === 'GET' && Object.keys(params).length) {
                 url.search = new URLSearchParams(params).toString();
             }
+    
             const options = {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
             };
-            if (body && (method === 'POST' || method === 'PUT')) {
+    
+            if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
                 options.body = JSON.stringify(body);
             }
+    
             const response = await fetch(url.toString(), options);
+    
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('Error data:', JSON.stringify(errorData, null, 2)); // Log full error
-                throw new Object({
-                    status: response.status,
-                    message: errorData.message || 'Unknown error',
-                    data: errorData,
-                });
-                }
+                let errorData = {};
+                try { errorData = await response.json(); } catch {}
+                throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+            }
+    
             return await response.json();
         } catch (err) {
-            console.log(err)
+            console.error('OkuAPI request failed:', err);
             throw err;
         }
     }
@@ -45,42 +44,23 @@ class OkuAPI {
         console.log("Fetching top pools from Icarus Tools...");
         const icarusUrl = '/ethereum/cush/topPools?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
     
-        const icarusRes = await this.request(icarusUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!icarusRes.ok) {
-            const err = await icarusRes.text();
-            console.error('Icarus HTTP Error:', icarusRes.status, err.slice(0, 200));
-            throw new Error(`Icarus API error: ${icarusRes.status}`);
-          }
-
-        const icarusData = await icarusRes.json();
-
-        return icarusData
+        // CORRECT: Pass method as SECOND argument
+        const icarusRes = await this.request(icarusUrl, 'GET');
+        
+        // No need to check .ok here — this.request() already throws on non-2xx
+        const icarusData = await icarusRes; // already JSON-parsed
+        console.log("ICARUS TOP POOLS:", icarusData);
+        return icarusData;
     }
-
+    
     async getTrendingPools() {
         console.log("Fetching trending pools from Icarus Tools...");
         const icarusUrl = '/ethereum/cush/trendingPools?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
     
-        const icarusRes = await this.request(icarusUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!icarusRes.ok) {
-            const err = await icarusRes.text();
-            console.error('Icarus HTTP Error:', icarusRes.status, err.slice(0, 200));
-            throw new Error(`Icarus API error: ${icarusRes.status}`);
-          }
-
-        const icarusData = await icarusRes.json();
-
-        return icarusData
+        const icarusRes = await this.request(icarusUrl, 'GET');
+        const icarusData = await icarusRes;
+        console.log("ICARUS TRENDING POOLS:", icarusData);
+        return icarusData;
     }
   
 

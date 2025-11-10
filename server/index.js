@@ -236,9 +236,8 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
     console.log(`Found ${holdings.length} holdings worth $${totalValue.toFixed(2)}`);
 
     // ────── 2. Fetch Top Pools from Icarus Tools (GET, no body) ──────
-    console.log("Fetching top pools from Icarus Tools...");
-    const icarusData = OkuApi.getTopPools();
-
+    const icarusData = await OkuApi.getTopPools();
+    console.log("Index icarus: ", icarusData)
     if (!icarusData.result?.pools) {
       console.error('Unexpected Icarus response:', icarusData);
       throw new Error('Invalid response from Icarus Tools');
