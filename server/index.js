@@ -62,7 +62,8 @@ app.get('/api/token-balances/:address', async (req, res) => {
       name: t.name,
       symbol: t.symbol,
       decimals: Number(t.decimals),
-      balance: t.balance,              
+      balance: t.balance,
+      logo: t.logo              
 
     }));
 

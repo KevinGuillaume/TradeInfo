@@ -53,9 +53,6 @@ export default function ProfileSection() {
     const validNFTs = data.nfts
       .map((nft: any) => {
         let image = nft.normalized_metadata?.image || '';
-        // if (image.startsWith('ipfs://')) {
-        //   image = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
-        // }
         return {
           ...nft,
           image,
@@ -154,16 +151,50 @@ export default function ProfileSection() {
                 ) : tokenBalances.length > 0 ? (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {tokenBalances.slice(0, 6).map((token) => (
-                      <div key={token.symbol} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-700/50 transition">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-gray-600 rounded-full" />
-                          <span className="text-xs text-white">{token.symbol}</span>
+                    <div
+                      key={token.contractAddress}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-700/50 transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Token Logo with fallback */}
+                        <div className="relative">
+                          {token.logo ? (
+                            <img
+                              src={token.logo}
+                              alt={token.symbol}
+                              className="w-7 h-7 rounded-full object-cover border border-gray-600"
+                              onError={(e) => {
+                                e.currentTarget.src = `https://via.placeholder.com/28?text=${token.symbol.slice(0, 2)}`;
+                              }}
+                            />
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                              <span className="text-white text-[10px] font-bold">
+                                {token.symbol.slice(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          {/* Optional: Tiny verified badge for known tokens */}
+                          {/* {['USDC', 'WETH', 'DAI', 'WBTC'].includes(token.symbol) && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800" />
+                          )} */}
                         </div>
-                        <span className="text-xs text-gray-400">
-                          {Number(ethers.formatUnits(token.balance, token.decimals)).toFixed(3)}
-                        </span>
+
+                        {/* Token Name + Symbol */}
+                        <div>
+                          <p className="text-sm text-left font-semibold text-white">{token.symbol}</p>
+                          <p className="text-xs text-gray-500">{token.name}</p>
+                        </div>
                       </div>
-                    ))}
+
+                      {/* Balance */}
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-white">
+                          {Number(ethers.formatUnits(token.balance, token.decimals)).toFixed(4)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                   </div>
                 ) : (
                   <p className="text-xs text-gray-500 text-center">No tokens</p>
