@@ -52,11 +52,9 @@ app.get('/api/token-balances/:address', async (req, res) => {
     const response = await Moralis.EvmApi.token.getWalletTokenBalances({
       chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
       address,
-      // optional filters
       excludeSpam: true,
     });
 
-    // `response.raw` = plain JSON array of token objects
     const balances = response.raw.map(t => ({
       contractAddress: t.token_address,
       name: t.name,
@@ -75,6 +73,7 @@ app.get('/api/token-balances/:address', async (req, res) => {
       .json({ error: 'Failed to fetch token balances', details: err.message });
   }
 });
+
 
 // Get account balance (ETH)
 app.get('/api/account-balance/:address', async (req, res) => {
@@ -121,6 +120,7 @@ app.get('/api/tokenPrice', async (req,res) => {
     return res.status(200).json(usdPrices)
 })
 
+
 app.get('/api/gasless/price', async (req, res) => {
   const { sellToken, buyToken, chainId } = req.query;
   if (!sellToken || !buyToken || !chainId) {
@@ -137,10 +137,8 @@ app.get('/api/gasless/price', async (req, res) => {
 
 
 /*****************
- * 
  * Swap related endpoints 
  *****************/
-
 app.get('/api/gasless/quote', async (req, res) => {
   const { sellToken, buyToken, sellAmount, taker, chainId, slippagePercentage } = req.query;
   if (!sellToken || !buyToken || !sellAmount || !taker || !chainId || !slippagePercentage) {
@@ -163,6 +161,7 @@ app.get('/api/gasless/quote', async (req, res) => {
   }
 });
 
+
 app.post('/api/gasless/submit', async (req, res) => {
   const { trade, approval, chainId } = req.body;
   if (!trade || !chainId) {
@@ -182,9 +181,6 @@ app.post('/api/gasless/submit', async (req, res) => {
 /*****************
  * Etc
  *****************/
-  // ──────────────────────────────────────────────────────────────
-//  Rebalance Suggestions – Moralis SDK version
-// ──────────────────────────────────────────────────────────────
 app.get('/api/rebalance-suggestions', async (req, res) => {
   try {
     const { userAddress } = req.query;
@@ -288,7 +284,7 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
         .slice(0, 2); // Max 2 per token
 
       matches.forEach((pool) => {
-        const amountUsd = Math.min(h.usdValue * 0.3, 5_000); // 30% or $5k max
+        const amountUsd = Math.min(h.usdValue * 0.3, 5_000); // 30% or $5k max still prob gonna change this
 
         suggestions.push({
           type: 'lp',
@@ -303,10 +299,6 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
         });
       });
     });
-    // ────── Optional: Add Swap/Stake/AI (from before) ──────
-    // ... keep your existing swap, Yearn, AI logic ...
-
-    // ────── Final Response ──────
     res.json({
       suggestions: suggestions.slice(0, 8),
       totalPortfolio: totalValue,
