@@ -1,7 +1,7 @@
 const ethers = require('ethers');
 
 
-// Alchemy API class so we can just create a singleton in the main index file bc this is good 
+// Oku API class so we can just create a singleton in the main index file bc this is good 
 class OkuAPI {
 
     constructor(baseUrl = 'https://omni.icarus.tools') {
@@ -43,27 +43,41 @@ class OkuAPI {
     async getTopPools() {
         console.log("Fetching top pools from Icarus Tools...");
         const icarusUrl = '/ethereum/cush/topPools?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
-    
-        // CORRECT: Pass method as SECOND argument
         const icarusRes = await this.request(icarusUrl, 'GET');
-        
-        // No need to check .ok here — this.request() already throws on non-2xx
         const icarusData = await icarusRes; // already JSON-parsed
         console.log("ICARUS TOP POOLS:", icarusData);
         return icarusData;
     }
+
     
     async getTrendingPools() {
         console.log("Fetching trending pools from Icarus Tools...");
         const icarusUrl = '/ethereum/cush/trendingPools?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
-    
         const icarusRes = await this.request(icarusUrl, 'GET');
         const icarusData = await icarusRes;
         console.log("ICARUS TRENDING POOLS:", icarusData);
         return icarusData;
     }
-  
 
+    
+    async getTokenPrice(address) {
+        console.log("Fetching token price from Icarus Tools...");
+        const icarusUrl = '/ethereum/cush/searchTokenByAddress?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
+        const body = {
+            params: [
+              address,
+              {
+                result_size: 2,
+                sort_by: "tvl",
+                sort_order: false
+              }
+            ]
+          };
+        const icarusRes = await this.request(endpoint=icarusUrl, method='POST',body=body);
+        const icarusData = await icarusRes;
+        console.log("ICARUS TOKEN PRICE:", icarusData);
+        return icarusData;
+    }
 }
 
 module.exports = OkuAPI
