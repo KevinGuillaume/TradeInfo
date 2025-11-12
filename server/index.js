@@ -206,6 +206,10 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
       rawTokens.map(async (t) => {
         let usdValue = 0;
         try {
+          //const icarusTokenData = await OkuApi.getTokenPrice(t.token_address);
+          // Might change this parsing to be handled on the singleton side still deciding
+          //const price = parseFloat(icarusTokenData.result.results[0].price || '0')
+          
           const priceResponse = await Moralis.EvmApi.token.getTokenPrice({
             address: t.token_address,
           });
