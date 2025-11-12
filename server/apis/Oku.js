@@ -78,6 +78,24 @@ class OkuAPI {
         console.log("ICARUS TOKEN PRICE:", icarusData);
         return icarusData;
     }
+
+    
+    async getUserTokenBalances(address) {
+        console.log("Fetching user token balances from Icarus Tools...");
+        const icarusUrl = '/ethereum/cush/userTokenBalances';
+        const body = {
+            params: [
+                address,
+                16000000
+              ]
+          };
+        const icarusRes = await this.request(endpoint=icarusUrl, method='POST',body=body);
+        const icarusData = await icarusRes;
+        console.log("ICARUS USER TOKEN BALANCES:", icarusData);
+        return icarusData;
+    }
 }
+
+
 
 module.exports = OkuAPI
