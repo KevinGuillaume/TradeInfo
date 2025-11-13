@@ -78,7 +78,7 @@ export class API {
         return res.json();
     }
 
-    async getRebalanceSuggestions(address: string) {
+    async getRebalanceSuggestionsAndAnalytics(address: string) {
         const res = await fetch(`${this.baseURL}/api/rebalance-suggestions?userAddress=${address}`);
         if (!res.ok) throw new Error('Rebalance fetch failed');
         const ans = await res.json()

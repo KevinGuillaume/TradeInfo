@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { backendAPI } from '../api';
 import { RefreshCw, ExternalLink, ArrowRight, Sparkles } from 'lucide-react';
+import TokenInsightCard from './TokenAnalyticsCard';
 
 interface Suggestion {
   type: 'lp' | 'swap' | 'stake' | 'ai';
@@ -13,9 +14,23 @@ interface Suggestion {
   risk?: string;
 }
 
+export interface TokenSignal {
+  type: string;
+  message: string;
+  details: Record<string, number | null>;
+}
+
+export interface TokenAnalytics {
+  token: string;
+  name: string;
+  price: number;
+  signals: TokenSignal[];
+}
+
 export default function Rebalancer() {
   const { address } = useAccount();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [analytics, setAnalytics] = useState<TokenAnalytics[]>([])
   const [loading, setLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<string>('');
 
@@ -23,8 +38,9 @@ export default function Rebalancer() {
     if (!address) return;
     setLoading(true);
     try {
-      const data = await backendAPI.getRebalanceSuggestions(address);
+      const data = await backendAPI.getRebalanceSuggestionsAndAnalytics(address);
       setSuggestions(data.suggestions);
+      setAnalytics(data.analytics)
       setLastRefresh(new Date().toLocaleTimeString());
     } catch (e) {
       console.error(e);
@@ -85,7 +101,7 @@ return (
             />
           ))}
         </div>
-      ) : suggestions.length === 0 ? (
+      ) : suggestions.length === 0 && analytics.length === 0? (
         <div className="text-center py-20">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-green-900/30 rounded-full mb-6">
             <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,6 +195,16 @@ return (
               </div>
             </div>
           ))}
+          {analytics.map((insight) => (
+  <TokenInsightCard
+    key={insight.token}
+    insight={insight}
+    onExecute={(insight) => {
+      // Open swap, rebalance, or AI analysis
+      console.log('Execute:', insight.token);
+    }}
+  />
+))}
         </div>
       )}
     </div>
