@@ -6,6 +6,8 @@ const ZeroXAPI = require('./apis/0x')
 const Moralis = require("moralis").default
 const axios = require('axios');
 const OkuAPI = require('./apis/Oku');
+const { analyzeTokenMetrics } = require('./utils/analytics')
+
 
 const app = express();
 const PORT = 3005;
@@ -188,7 +190,7 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
 
     // ────── 1. Fetch Holdings via Moralis SDK (with USD prices) ──────
     console.log("Fetching token balances...");
-
+    const analytics = []
     const tokenBalancesResponse = await Moralis.EvmApi.token.getWalletTokenBalances({
       chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
       address: userAddress,
@@ -202,19 +204,22 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
       rawTokens.map(async (t) => {
         let usdValue = 0;
         try {
-          //const icarusTokenData = await OkuApi.getTokenPrice(t.token_address);
-          // Might change this parsing to be handled on the singleton side still deciding
-          //const price = parseFloat(icarusTokenData.result.results[0].price || '0')
-          
-          const priceResponse = await Moralis.EvmApi.token.getTokenPrice({
-            address: t.token_address,
-          });
-          const price = parseFloat(priceResponse.raw.usdPrice || '0');
+          const icarusTokenData = await OkuApi.getTokenPrice(t.token_address);
+          const price = parseFloat(icarusTokenData.price || '0')
           const balance = parseFloat(t.balance|| '0');
           usdValue = price * balance;
+
+          const tokenAnalytics = analyzeTokenMetrics(icarusTokenData)
+          console.log("Token analytics: ", tokenAnalytics)
+          analytics.push(tokenAnalytics)
+
+
+
+
         } catch (err) {
           console.warn(`Price fetch failed for ${t.symbol}:`, err);
         }
+
 
         return {
           address: t.token_address.toLowerCase(),
@@ -238,7 +243,6 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
 
     // ────── 2. Fetch Top Pools from Icarus Tools (GET, no body) ──────
     const icarusData = await OkuApi.getTopPools();
-    console.log("Index icarus: ", icarusData)
     if (!icarusData.result?.pools) {
       console.error('Unexpected Icarus response:', icarusData);
       throw new Error('Invalid response from Icarus Tools');
@@ -275,7 +279,6 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
 
     // ────── 4. Generate LP Suggestions ──────
     const suggestions = [];
-
     holdings.forEach((h) => {
       const matches = poolsWithApy
         .filter((p) =>
@@ -299,8 +302,11 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
         });
       });
     });
+
+
     res.json({
       suggestions: suggestions.slice(0, 8),
+      analytics: analytics,
       totalPortfolio: totalValue,
       refreshedAt: new Date().toISOString(),
       source: 'Icarus Tools + Moralis',

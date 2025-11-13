@@ -9,7 +9,7 @@ class OkuAPI {
         this.baseUrl = `${baseUrl}`;
     }
   
-    async request(endpoint, method = 'GET', params = {}, body = null) {
+    async request(endpoint, method = 'GET',  body = null,params = {}) {
         try {
             const url = new URL(`${this.baseUrl}${endpoint}`);
             if (method === 'GET' && Object.keys(params).length) {
@@ -73,10 +73,11 @@ class OkuAPI {
               }
             ]
           };
-        const icarusRes = await this.request(endpoint=icarusUrl, method='POST',body=body);
+        const icarusRes = await this.request(icarusUrl, 'POST',body);
         const icarusData = await icarusRes;
         console.log("ICARUS TOKEN PRICE:", icarusData);
-        return icarusData;
+        // Since we are only querying for the 1 just return the first instance
+        return icarusData.result.results[0];
     }
 
     
@@ -89,7 +90,7 @@ class OkuAPI {
                 16000000
               ]
           };
-        const icarusRes = await this.request(endpoint=icarusUrl, method='POST',body=body);
+        const icarusRes = await this.request(icarusUrl, 'POST',body);
         const icarusData = await icarusRes;
         console.log("ICARUS USER TOKEN BALANCES:", icarusData);
         return icarusData;
