@@ -4,8 +4,9 @@ import { useAccount } from 'wagmi';
 import { backendAPI } from '../api';
 import { RefreshCw, ExternalLink, ArrowRight, Sparkles } from 'lucide-react';
 import TokenInsightCard from './TokenAnalyticsCard';
+import PoolAnalyticsCard from './PoolAnalyticsCard';
 
-interface Suggestion {
+export interface Suggestion {
   type: 'lp' | 'swap' | 'stake' | 'ai';
   title: string;
   description: string;
@@ -115,95 +116,21 @@ return (
         /* Suggestions Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {suggestions.map((s, i) => (
-            <div
+            <PoolAnalyticsCard 
               key={i}
-              className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${
-                s.type === 'ai'
-                  ? 'bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-500/50 shadow-purple-500/20'
-                  : 'bg-gray-800/60 border-gray-700 shadow-xl'
-              }`}
-            >
-              {s.type === 'ai' && (
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse" />
-              )}
-
-              <div className="relative p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    {s.type === 'lp' && <div className="w-10 h-10 bg-blue-600/30 rounded-xl flex items-center justify-center">Pool</div>}
-                    {s.type === 'swap' && <div className="w-10 h-10 bg-green-600/30 rounded-xl flex items-center justify-center">Swap</div>}
-                    {s.type === 'stake' && <div className="w-10 h-10 bg-yellow-600/30 rounded-xl flex items-center justify-center">Vault</div>}
-                    {s.type === 'ai' && (
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center animate-pulse">
-                        <Sparkles className="w-6 h-6 text-white" />
-                      </div>
-                    )}
-
-                    <div>
-                      <h3 className="font-bold text-lg flex items-center gap-2">
-                        {s.type === 'lp' && 'Liquidity Pool'}
-                        {s.type === 'swap' && 'Smart Swap'}
-                        {s.type === 'stake' && 'Yield Vault'}
-                        {s.type === 'ai' && 'AI Insight'}
-                        {s.apy && (
-                          <span className="text-green-400 font-bold text-sm ml-2">
-                            +{s.apy}
-                          </span>
-                        )}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-gray-300 font-medium mb-2">{s.title}</p>
-                <p className="text-sm text-gray-400 mb-4 leading-relaxed">{s.description}</p>
-
-                {s.risk && (
-                  <span
-                    className={`inline-block px-3 py-1 text-xs font-medium rounded-full mb-4 ${
-                      s.risk === 'Low'
-                        ? 'bg-green-900/50 text-green-300 border border-green-700'
-                        : s.risk === 'Medium'
-                        ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-700'
-                        : 'bg-red-900/50 text-red-300 border border-red-700'
-                    }`}
-                  >
-                    Risk: {s.risk}
-                  </span>
-                )}
-
-                {s.action && (
-                  <button
-                    onClick={() => handleAction(s)}
-                    className={`w-full mt-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
-                      s.type === 'ai'
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg'
-                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
-                    }`}
-                  >
-                    {s.action.type === 'link' ? (
-                      <>
-                        View on Oku <ExternalLink className="w-4 h-4" />
-                      </>
-                    ) : (
-                      <>
-                        Execute Now <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
+              suggestion={s}
+              onAction={handleAction}
+            />
           ))}
           {analytics.map((insight) => (
-  <TokenInsightCard
-    key={insight.token}
-    insight={insight}
-    onExecute={(insight) => {
-      // Open swap, rebalance, or AI analysis
-      console.log('Execute:', insight.token);
-    }}
-  />
+            <TokenInsightCard
+              key={insight.token}
+              insight={insight}
+              onExecute={(insight) => {
+                // will add function to handle the corresponding action
+                console.log('do something with:', insight.token);
+              }}
+            />
 ))}
         </div>
       )}
