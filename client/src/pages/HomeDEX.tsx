@@ -1,11 +1,12 @@
 // pages/HomeDEX.tsx
 import { useState } from 'react';
 import ProfileSection from "../components/ProfileSection";
-import Rebalancer from "../components/Rebalancer";
 import Swap from "../components/Swap";
+import TokenAnalytics from '../components/TokenAnalytics';
+import PoolAnalytics from '../components/PoolAnalytics';
 
 export default function HomeDEX() {
-  const [activeTab, setActiveTab] = useState<'rebalance' | 'swap'>('rebalance');
+  const [activeTab, setActiveTab] = useState<'pools' | 'swap' | 'tokens'>('tokens');
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
@@ -16,14 +17,24 @@ export default function HomeDEX() {
           {/* Tabs */}
           <div className="flex border-b border-gray-700">
             <button
-              onClick={() => setActiveTab('rebalance')}
+              onClick={() => setActiveTab('tokens')}
               className={`flex-1 py-4 px-6 text-lg font-semibold transition-all duration-300 ${
-                activeTab === 'rebalance'
+                activeTab === 'tokens'
+                  ? 'text-white border-b-2 border-blue-500 bg-gray-700/50'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/30'
+              }`}
+            >
+              Tokens
+            </button>
+            <button
+              onClick={() => setActiveTab('pools')}
+              className={`flex-1 py-4 px-6 text-lg font-semibold transition-all duration-300 ${
+                activeTab === 'pools'
                   ? 'text-white border-b-2 border-purple-500 bg-gray-700/50'
                   : 'text-gray-400 hover:text-white hover:bg-gray-700/30'
               }`}
             >
-              Rebalance
+              Pools
             </button>
             <button
               onClick={() => setActiveTab('swap')}
@@ -39,7 +50,9 @@ export default function HomeDEX() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            {activeTab === 'rebalance' ? <Rebalancer /> : <Swap />}
+          {activeTab === 'tokens' && <TokenAnalytics />}
+          {activeTab === 'swap' && <Swap />}
+          {activeTab === 'pools' && <PoolAnalytics />}
           </div>
         </div>
       </div>

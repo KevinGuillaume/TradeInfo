@@ -78,11 +78,19 @@ export class API {
         return res.json();
     }
 
-    async getRebalanceSuggestionsAndAnalytics(address: string) {
-        const res = await fetch(`${this.baseURL}/api/rebalance-suggestions?userAddress=${address}`);
-        if (!res.ok) throw new Error('Rebalance fetch failed');
+    async getTokenAnalytics(address: string) {
+        const res = await fetch(`${this.baseURL}/api/token-analytics?userAddress=${address}`);
+        if (!res.ok) throw new Error('Token analytics fetch failed');
         const ans = await res.json()
-        console.log("Rebalance summary: ", ans)
+        console.log("Token Analytics summary: ", ans)
+        return ans;
+    }
+
+    async getPoolAnalytics() {
+        const res = await fetch(`${this.baseURL}/api/pool-analytics`);
+        if (!res.ok) throw new Error('Token analytics fetch failed');
+        const ans = await res.json()
+        console.log("Pool Analytics summary: ", ans)
         return ans;
     }
 
