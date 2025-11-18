@@ -1,7 +1,6 @@
 require('dotenv').config({ debug: true }); // Enable dotenv debug
 const express = require('express');
 const cors = require('cors');
-const AlchemyAPI = require('./apis/alchemy');
 const ZeroXAPI = require('./apis/0x')
 const Moralis = require("moralis").default
 const axios = require('axios');
@@ -34,7 +33,6 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-const alchemyApi = new AlchemyAPI();
 const OkuApi = new OkuAPI()
 const zeroXApi = new ZeroXAPI();
 
