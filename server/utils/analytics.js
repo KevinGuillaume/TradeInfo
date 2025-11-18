@@ -81,4 +81,32 @@ function analyzeTokenMetrics(data) {
     };
   }
   
-  module.exports = {analyzeTokenMetrics}
+
+  function calculatePoolStats(pool) {
+    const tvl = pool.tvl_usd;
+    const fees24h = pool.total_fees_usd;
+    const volume24h = pool.t0_volume_usd;
+  
+    return {
+      address: pool.address,
+      tokenOneName: pool.t0_name,
+      tokenOneSymbol: pool.t0_symbol,
+      tokenTwoName: pool.t1_name,
+      tokenTwoSymbol: pool.t1_symbol,
+      volume7d: pool.total_volume_7d_usd,
+      apy7d: Number(((fees24h * 52) / tvl * 100).toFixed(2)),
+      apy24h: Number(((fees24h * 365) / tvl * 100).toFixed(2)),
+      feesPerMillion: Number((fees24h / (tvl / 1_000_000)).toFixed(0)),
+      vTvlRatio: Number((volume24h / tvl).toFixed(2)),
+      volumeGrowth7d: Number((pool.t0_volume_change_7d * 100).toFixed(1)),
+      isStablePair: ['USDC', 'USDT', 'DAI'].includes(pool.t0_symbol) && ['USDC', 'USDT', 'DAI'].includes(pool.t1_symbol),
+      isHighLiquidity: tvl > 5_000_000,
+      opportunityScore: Math.min(100, 
+        (fees24h * 52 / tvl * 100 > 20 ? 40 : 20) +
+        (volume24h / tvl > 15 ? 30 : 15) +
+        (tvl > 10_000_000 ? 30 : 10)
+      )
+    };
+  };
+
+  module.exports = {analyzeTokenMetrics, calculatePoolStats}

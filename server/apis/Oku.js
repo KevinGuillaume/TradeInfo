@@ -42,10 +42,22 @@ class OkuAPI {
   
     async getTopPools() {
         console.log("Fetching top pools from Icarus Tools...");
-        const icarusUrl = '/ethereum/cush/topPools?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
-        const icarusRes = await this.request(icarusUrl, 'GET');
+        const icarusUrl = '/ethereum/cush/topPools';
+        const body = {
+            params: [
+                {
+                fee_tiers:[
+                  100
+                ],
+                  result_size: 8,
+                  sort_by: "tx_count",
+                  sort_order: false
+            }]
+          };
+
+
+        const icarusRes = await this.request(icarusUrl, 'POST',body);
         const icarusData = await icarusRes; // already JSON-parsed
-        console.log("ICARUS TOP POOLS:", icarusData);
         return icarusData;
     }
 
@@ -55,7 +67,6 @@ class OkuAPI {
         const icarusUrl = '/ethereum/cush/trendingPools?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
         const icarusRes = await this.request(icarusUrl, 'GET');
         const icarusData = await icarusRes;
-        console.log("ICARUS TRENDING POOLS:", icarusData);
         return icarusData;
     }
 
@@ -75,7 +86,6 @@ class OkuAPI {
           };
         const icarusRes = await this.request(icarusUrl, 'POST',body);
         const icarusData = await icarusRes;
-        console.log("ICARUS TOKEN PRICE:", icarusData);
         // Since we are only querying for the 1 just return the first instance
         return icarusData.result.results[0];
     }
@@ -92,7 +102,6 @@ class OkuAPI {
           };
         const icarusRes = await this.request(icarusUrl, 'POST',body);
         const icarusData = await icarusRes;
-        console.log("ICARUS USER TOKEN BALANCES:", icarusData);
         return icarusData;
     }
 }

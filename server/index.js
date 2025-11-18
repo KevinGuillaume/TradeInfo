@@ -6,7 +6,7 @@ const ZeroXAPI = require('./apis/0x')
 const Moralis = require("moralis").default
 const axios = require('axios');
 const OkuAPI = require('./apis/Oku');
-const { analyzeTokenMetrics } = require('./utils/analytics')
+const { analyzeTokenMetrics, calculatePoolStats } = require('./utils/analytics')
 
 
 const app = express();
@@ -183,7 +183,7 @@ app.post('/api/gasless/submit', async (req, res) => {
 /*****************
  * Etc
  *****************/
-app.get('/api/rebalance-suggestions', async (req, res) => {
+app.get('/api/token-analytics', async (req, res) => {
   try {
     const { userAddress } = req.query;
     if (!userAddress) return res.status(400).json({ error: 'userAddress required' });
@@ -200,7 +200,7 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
     const rawTokens = tokenBalancesResponse.raw;
 
     // Fetch USD price for each token
-    const holdingsWithPrice = await Promise.all(
+    await Promise.all(
       rawTokens.map(async (t) => {
         let usdValue = 0;
         try {
@@ -210,7 +210,6 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
           usdValue = price * balance;
 
           const tokenAnalytics = analyzeTokenMetrics(icarusTokenData)
-          console.log("Token analytics: ", tokenAnalytics)
           analytics.push(tokenAnalytics)
 
 
@@ -232,82 +231,8 @@ app.get('/api/rebalance-suggestions', async (req, res) => {
       })
     );
 
-    // Filter out low-value and spam
-    const holdings = holdingsWithPrice
-      .filter((h) => h.usdValue > 50) // $50 min
-      .sort((a, b) => b.usdValue - a.usdValue);
-
-    const totalValue = holdings.reduce((sum, h) => sum + h.usdValue, 0);
-
-    console.log(`Found ${holdings.length} holdings worth $${totalValue.toFixed(2)}`);
-
-    // ────── 2. Fetch Top Pools from Icarus Tools (GET, no body) ──────
-    const icarusData = await OkuApi.getTopPools();
-    if (!icarusData.result?.pools) {
-      console.error('Unexpected Icarus response:', icarusData);
-      throw new Error('Invalid response from Icarus Tools');
-    }
-
-    // ────── 3. Map & Compute APY ──────
-    const poolsWithApy = icarusData.result.pools
-      .filter((p) => p.tvl_usd > 100_000 && p.total_fees_usd > 0)
-      .map((p) => {
-        const apy = ((p.total_fees_usd / p.tvl_usd) * 365 * 100).toFixed(2) + '%';
-
-        return {
-          id: p.address,
-          token0: {
-            address: p.t0.toLowerCase(),
-            symbol: p.t0_symbol,
-            name: p.t0_name,
-          },
-          token1: {
-            address: p.t1.toLowerCase(),
-            symbol: p.t1_symbol,
-            name: p.t1_name,
-          },
-          fee: p.fee, // e.g., 3000 = 0.3%
-          tvl_usd: p.tvl_usd,
-          total_fees_usd: p.total_fees_usd,
-          volume_usd: p.t0_volume_usd + p.t1_volume_usd,
-          apy,
-          risk: p.tvl_usd > 5_000_000 ? 'Low' : p.tvl_usd > 1_000_000 ? 'Medium' : 'High',
-        };
-      });
-
-    console.log(`Fetched ${poolsWithApy.length} high-yield pools`);
-
-    // ────── 4. Generate LP Suggestions ──────
-    const suggestions = [];
-    holdings.forEach((h) => {
-      const matches = poolsWithApy
-        .filter((p) =>
-          [p.token0.address, p.token1.address].includes(h.address)
-        )
-        .slice(0, 2); // Max 2 per token
-
-      matches.forEach((pool) => {
-        const amountUsd = Math.min(h.usdValue * 0.3, 5_000); // 30% or $5k max still prob gonna change this
-
-        suggestions.push({
-          type: 'lp',
-          title: `Earn ${pool.apy} APY on ${pool.token0.symbol}/${pool.token1.symbol}`,
-          description: `Add $${amountUsd.toFixed(0)} to this Uniswap v3 pool (TVL: $${pool.tvl_usd.toLocaleString()})`,
-          action: {
-            type: 'link',
-            url: `https://oku.trade/uniswap/v3/pool/ethereum/${pool.id}`, // Works if pool is on Oku
-          },
-          apy: pool.apy,
-          risk: pool.risk,
-        });
-      });
-    });
-
-
     res.json({
-      suggestions: suggestions.slice(0, 8),
       analytics: analytics,
-      totalPortfolio: totalValue,
       refreshedAt: new Date().toISOString(),
       source: 'Icarus Tools + Moralis',
     });
@@ -330,3 +255,20 @@ app.get('/api/nfts/:address', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch NFTs' });
   }
 });
+
+
+app.get('/api/pool-analytics', async (req, res) => {
+  const icarusData = await OkuApi.getTopPools();
+  if (!icarusData.result?.pools) {
+    console.error('Unexpected Icarus response:', icarusData);
+    throw new Error('Invalid response from Icarus Tools');
+  }
+  const allPools = icarusData.result.pools
+  //console.log("ALL ;POOLS: ", allPools)
+  const poolAnalytics = await allPools.map(pool => 
+    calculatePoolStats(pool)
+  )
+  res.json({
+    pools: poolAnalytics
+  })
+})
