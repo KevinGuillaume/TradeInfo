@@ -1,110 +1,153 @@
-import { Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
-import type { Suggestion } from './Rebalancer'; 
+// components/PoolOpportunitiesGrid.tsx
+import { TrendingUp, AlertCircle, Sparkles, TrendingDown, ExternalLink } from 'lucide-react';
 
-interface PoolAnalyticsCardProps {
-  suggestion: Suggestion;
-  onAction: (suggestion: Suggestion) => void;
+interface PoolStats {
+  tokenOneName: string,
+  tokenOneSymbol: string,
+  tokenTwoName: string,
+  tokenTwoSymbol: string,
+  volume7d:number,
+  apy7d: number;
+  apy24h: number;
+  feesPerMillion: number;
+  vTvlRatio: number;
+  volumeGrowth7d: number;
+  isStablePair: boolean;
+  isHighLiquidity: boolean;
+  opportunityScore: number;
+  // Add your original pool data
+  address: string;
+  tokens: string;        // e.g. "WETH / USDT"
+  feeTier: string;       // "0.01%"
+  tvlUsd: number;
+  volume24hUsd: number;
+  fees24hUsd: number;
 }
 
-export default function PoolAnalyticsCard({ suggestion, onAction }: PoolAnalyticsCardProps) {
-  const { type, title, description, apy, risk, action } = suggestion;
+interface PoolOpportunitiesGridProps {
+  pools: PoolStats[];
+}
+
+export default function PoolOpportunitiesGrid({ pools }: PoolOpportunitiesGridProps) {
+  const sortedPools = [...pools].sort((a, b) => b.opportunityScore - a.opportunityScore);
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'from-emerald-500 to-green-500';
+    if (score >= 60) return 'from-blue-500 to-cyan-500';
+    if (score >= 40) return 'from-yellow-500 to-orange-500';
+    return 'from-gray-600 to-gray-500';
+  };
+
+  const getVerdict = (pool: PoolStats) => {
+    if (pool.opportunityScore >= 80) return { text: "Top Tier", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/50" };
+    if (pool.opportunityScore >= 60) return { text: "Strong", color: "bg-blue-500/20 text-blue-300 border-blue-500/50" };
+    if (pool.opportunityScore >= 40) return { text: "Decent", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/50" };
+    return { text: "Low Yield", color: "bg-gray-700/50 text-gray-400" };
+  };
+
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${
-        type === 'ai'
-          ? 'bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-500/50 shadow-purple-500/20'
-          : 'bg-gray-800/60 border-gray-700 shadow-xl'
-      }`}
-    >
-      {type === 'ai' && (
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse" />
-      )}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {sortedPools.map((pool) => {
+        const verdict = getVerdict(pool);
+        const isHot = pool.volumeGrowth7d > 50 || pool.apy7d > 15;
 
-      <div className="relative p-6">
-        {/* Header: Icon + Title */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            {/* Icon */}
-            {type === 'lp' && (
-              <div className="w-10 h-10 bg-blue-600/30 rounded-xl flex items-center justify-center text-xs font-bold text-blue-300">
-                Pool
-              </div>
-            )}
-            {type === 'swap' && (
-              <div className="w-10 h-10 bg-green-600/30 rounded-xl flex items-center justify-center text-xs font-bold text-green-300">
-                Swap
-              </div>
-            )}
-            {type === 'stake' && (
-              <div className="w-10 h-10 bg-yellow-600/30 rounded-xl flex items-center justify-center text-xs font-bold text-yellow-300">
-                Vault
-              </div>
-            )}
-            {type === 'ai' && (
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center animate-pulse">
-                <Sparkles className="w-6 h-6 text-white" />
+          
+
+        return (
+          <div
+            key={pool.address}
+            className="relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-gray-800/60 border-gray-700"
+          >
+            {/* Hot Badge */}
+            {isHot && (
+              <div className="absolute top-3 right-3 z-10">
+                <span className="px-3 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/50 rounded-full flex items-center gap-1">
+                  HOT <Sparkles className="w-3 h-3" />
+                </span>
               </div>
             )}
 
-            {/* Title */}
-            <div>
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                {type === 'lp' && 'Liquidity Pool'}
-                {type === 'swap' && 'Smart Swap'}
-                {type === 'stake' && 'Yield Vault'}
-                {type === 'ai' && 'AI Insight'}
-                {apy && (
-                  <span className="text-green-400 font-bold text-sm ml-2">
-                    +{apy}
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white">{pool.tokenOneSymbol} / {pool.tokenTwoSymbol}</h3>
+                  <p className="text-sm text-gray-400">{pool.feeTier} fee</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-black text-green-400">
+                    {pool.apy7d.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-gray-500">Real 7d APY</p>
+                </div>
+              </div>
+
+              {/* Score Bar */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-gray-400">Opportunity Score</span>
+                  <span className="font-bold text-white">{pool.opportunityScore}/100</span>
+                </div>
+                <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full bg-gradient-to-r ${getScoreColor(pool.opportunityScore)} transition-all duration-1000`}
+                    style={{ width: `${pool.opportunityScore}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Key Stats */}
+              <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                <div className="bg-gray-700/40 rounded-lg p-2.5">
+                  <p className="text-gray-400 text-xs">7d Volume</p>
+                  <p className="font-bold text-white">
+                    ${pool.volume7d > 1e9 ? (pool.volume7d / 1e9).toFixed(2) + 'B' : (pool.volume7d / 1e6).toFixed(0) + 'M'}
+                  </p>
+                </div>
+                <div className="bg-gray-700/40 rounded-lg p-2.5">
+                  <p className="text-gray-400 text-xs">Fees / $1M</p>
+                  <p className="font-bold text-green-400">${pool.feesPerMillion.toLocaleString()}</p>
+                </div>
+                <div className="bg-gray-700/40 rounded-lg p-2.5">
+                  <p className="text-gray-400 text-xs">V/TVL Ratio</p>
+                  <p className="font-bold text-white">{pool.vTvlRatio.toFixed(1)}x</p>
+                </div>
+                <div className="bg-gray-700/40 rounded-lg p-2.5">
+                  <p className="text-gray-400 text-xs">7d Growth</p>
+                  <p className={`font-bold flex items-center gap-1 ${pool.volumeGrowth7d > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {pool.volumeGrowth7d > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {pool.volumeGrowth7d.toFixed(0)}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Verdict + Stable Badge */}
+              <div className="flex items-center justify-between mb-4">
+                <span className={`px-4 py-2 text-sm font-bold rounded-full border ${verdict.color}`}>
+                  {verdict.text}
+                </span>
+                {pool.isStablePair && (
+                  <span className="text-xs text-cyan-400 flex items-center gap-1">
+                    Low IL Risk
                   </span>
                 )}
-              </h3>
+              </div>
+
+              {/* Action */}
+              <a
+                href={`https://oku.trade/uniswap/v3/pool/ethereum/${pool.address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 font-bold text-white transition-all hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                >
+                View Pool
+                <ExternalLink className="h-4 w-4" />
+             </a>
             </div>
           </div>
-        </div>
-
-        {/* Content */}
-        <p className="text-gray-300 font-medium mb-2">{title}</p>
-        <p className="text-sm text-gray-400 mb-4 leading-relaxed">{description}</p>
-
-        {/* Risk Badge */}
-        {risk && (
-          <span
-            className={`inline-block px-3 py-1 text-xs font-medium rounded-full mb-4 ${
-              risk === 'Low'
-                ? 'bg-green-900/50 text-green-300 border border-green-700'
-                : risk === 'Medium'
-                ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-700'
-                : 'bg-red-900/50 text-red-300 border border-red-700'
-            }`}
-          >
-            Risk: {risk}
-          </span>
-        )}
-
-        {/* Action Button */}
-        {action && (
-          <button
-            onClick={() => onAction(suggestion)}
-            className={`w-full mt-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
-              type === 'ai'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg'
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
-            }`}
-          >
-            {action.type === 'link' ? (
-              <>
-                View on Oku <ExternalLink className="w-4 h-4" />
-              </>
-            ) : (
-              <>
-                Execute Now <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
 }
