@@ -20,9 +20,7 @@ enum SignatureType {
 
 export default function Swap() {
   const { signTypedDataAsync } = useSignTypedData();
-  const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { writeContractAsync } = useWriteContract();
+  const { address } = useAccount();
 
   const [tokenOneAmount, setTokenOneAmount] = useState<string>("");
   const [tokenTwoAmount, setTokenTwoAmount] = useState<string>("");
@@ -85,7 +83,7 @@ const formatSignatureFor0x = (signature: string) => {
         sellAmount,
         taker: address,
         chainId: 1,
-        slippagePercentage: "0.25", // 0.5% slippage prob gonna make this a setting in the swap UI
+        slippagePercentage: "0.25", // 0.25% slippage prob gonna make this a setting in the swap UI
       });
   
       if (quote.trade.type !== 'settler_metatransaction') {
