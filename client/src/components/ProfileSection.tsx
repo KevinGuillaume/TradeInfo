@@ -19,7 +19,6 @@ export default function ProfileSection() {
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingNFTs, setLoadingNFTs] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
   const [ethBalance, setEthBalance] = useState<string | null>(null);
   const chainName = chainId === 1 ? 'Ethereum Mainnet' : 'Unknown Network';
 
@@ -28,7 +27,7 @@ export default function ProfileSection() {
       const balance: any = await backendAPI.getAccountBalance(address);
       setEthBalance(balance.balance);
     } catch (err) {
-      setApiError('Failed to fetch ETH balance.');
+      console.error('Failed to fetch ETH balance.');
     }
   };
 
@@ -38,7 +37,7 @@ export default function ProfileSection() {
       const balances: any = await backendAPI.getTokenBalances(address);
       setTokenBalances(balances.balances || []);
     } catch (err) {
-      setApiError('Failed to fetch token balances.');
+      console.error('Failed to fetch token balances.');
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import tokenList from '../data/token.json'
 import { backendAPI } from '../api';
 import TokenSelectModal from "./modals/TokenSelectModal";
-import { useAccount, useBalance, useDisconnect, useSignTypedData, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useSignTypedData } from "wagmi";
 import { parseUnits } from "viem";
 
 // This is shape of our token from the json list 
@@ -14,9 +14,6 @@ interface Token {
   logoURI: string;
 }
 
-enum SignatureType {
-  EIP712 = 2,
-}
 
 export default function Swap() {
   const { signTypedDataAsync } = useSignTypedData();
@@ -55,7 +52,7 @@ const formatSignatureFor0x = (signature: string) => {
     v,
     r,
     s,
-    signatureType: SignatureType.EIP712,
+    signatureType: 2,
   };
 };
 

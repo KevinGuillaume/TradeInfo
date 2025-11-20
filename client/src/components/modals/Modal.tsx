@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import Modal from "react-modal";
 
 // Bind modal to your app's root element for accessibility

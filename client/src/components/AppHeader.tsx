@@ -3,10 +3,6 @@ import { NavLink } from 'react-router-dom';
 import ConnectWalletButton from './ConnectWalletButton';
 
 export default function AppHeader() {
-  const navItems = [
-    { to: '/', label: 'Rebalancer' },
-  ];
-
   return (
     <div className="w-full border-b border-gray-800/50 backdrop-blur-xl bg-gray-900/70 sticky top-0 z-50 shadow-2xl">
       <div className="flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">

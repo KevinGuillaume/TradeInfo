@@ -27,7 +27,7 @@ export default function TokenInsightCard( {token, name, price, contract, signals
     }
   };
 
-  const getSignalColor = (type: string, message: string) => {
+  const getSignalColor = (message: string) => {
     if (message.includes('Bullish') || message.includes('Strong upward')) {
       return 'from-green-500 to-emerald-500';
     }
@@ -79,7 +79,7 @@ export default function TokenInsightCard( {token, name, price, contract, signals
                   : 'bg-yellow-900/30 border-yellow-700/50'
               }`}
             >
-              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getSignalColor(signal.type, signal.message)} p-1.5 flex items-center justify-center text-white`}>
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getSignalColor(signal.message)} p-1.5 flex items-center justify-center text-white`}>
                 {getSignalIcon(signal.type)}
               </div>
               <div className="flex-1">
