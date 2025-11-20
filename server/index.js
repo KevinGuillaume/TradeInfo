@@ -19,7 +19,7 @@ Moralis.start({
 
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
+  origin: process.env.FRONTEND_URL, // Your frontend URL
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 }));
