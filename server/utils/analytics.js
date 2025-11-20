@@ -77,6 +77,7 @@ function analyzeTokenMetrics(data) {
       token: token.symbol,
       name: token.name,
       price: token.price,
+      contract:token.contract,
       signals
     };
   }
@@ -94,6 +95,7 @@ function analyzeTokenMetrics(data) {
       tokenTwoName: pool.t1_name,
       tokenTwoSymbol: pool.t1_symbol,
       volume7d: pool.total_volume_7d_usd,
+      feeTier:pool.fee,
       apy7d: Number(((fees24h * 52) / tvl * 100).toFixed(2)),
       apy24h: Number(((fees24h * 365) / tvl * 100).toFixed(2)),
       feesPerMillion: Number((fees24h / (tvl / 1_000_000)).toFixed(0)),
