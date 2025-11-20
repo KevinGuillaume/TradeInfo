@@ -10,16 +10,13 @@ export interface TokenSignal {
     token: string;
     name: string;
     price: number;
+    contract: string;
     signals: TokenSignal[];
   }
 
 
-interface TokenInsightCardProps {
-  insight: TokenAnalytics;
-  onExecute?: (insight: TokenAnalytics) => void;
-}
 
-export default function TokenInsightCard({ insight, onExecute }: TokenInsightCardProps) {
+export default function TokenInsightCard( {token, name, price, contract, signals}: TokenAnalytics) {
   const getSignalIcon = (type: string) => {
     switch (type) {
       case 'Liquidity Momentum': return <TrendingUp className="w-5 h-5" />;
@@ -42,7 +39,7 @@ export default function TokenInsightCard({ insight, onExecute }: TokenInsightCar
 
   return (
     <div
-      key={insight.token}
+      key={token}
       className="relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-gradient-to-br from-gray-800/60 via-gray-900/50 to-gray-800/60 border-gray-700 shadow-xl"
     >
       {/* Subtle animated gradient overlay */}
@@ -55,17 +52,17 @@ export default function TokenInsightCard({ insight, onExecute }: TokenInsightCar
             {/* Token Icon */}
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">
-                {insight.token.slice(0, 2)}
+                {token.slice(0, 2)}
               </span>
             </div>
 
             <div>
               <h3 className="font-bold text-lg text-white flex items-center gap-2">
-                {insight.token}
-                <span className="text-sm text-gray-400 font-normal">• {insight.name}</span>
+                {token}
+                <span className="text-sm text-gray-400 font-normal">• {name}</span>
               </h3>
               <p className="text-xl font-bold text-green-400">
-                ${insight.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
               </p>
             </div>
           </div>
@@ -73,7 +70,7 @@ export default function TokenInsightCard({ insight, onExecute }: TokenInsightCar
 
         {/* Signals */}
         <div className="space-y-3 mb-4">
-          {insight.signals.map((signal, idx) => (
+          {signals.map((signal, idx) => (
             <div
               key={idx}
               className={`flex items-start gap-3 p-3 rounded-xl border backdrop-blur-sm transition-all hover:scale-[1.01] ${
@@ -92,16 +89,17 @@ export default function TokenInsightCard({ insight, onExecute }: TokenInsightCar
             </div>
           ))}
         </div>
-
         {/* Action Button */}
-        {onExecute && (
-          <button
-            onClick={() => onExecute(insight)}
-            className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-          >
-            Analyze {insight.token} <ArrowRight className="w-4 h-4" />
-          </button>
-        )}
+        <a
+        href={`https://oku.trade/app/ethereum/trade/${contract}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 font-bold text-white shadow-lg transition-all duration-300 hover:from-purple-700 hover:to-blue-700"
+        >
+            Analyze {token}
+            <ArrowRight className="h-4 w-4" />
+        </a>
+
       </div>
     </div>
   );

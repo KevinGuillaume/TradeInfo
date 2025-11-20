@@ -1,18 +1,8 @@
-// Rebalancer.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { backendAPI } from '../api';
-import { RefreshCw, ExternalLink, ArrowRight, Sparkles } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import TokenInsightCard from './TokenAnalyticsCard';
-
-export interface Suggestion {
-  type: 'lp' | 'swap' | 'stake' | 'ai';
-  title: string;
-  description: string;
-  action?: { type: 'link'; url: string } | { type: 'swap'; swapParams: any };
-  apy?: string;
-  risk?: string;
-}
 
 export interface TokenSignal {
   type: string;
@@ -22,6 +12,7 @@ export interface TokenSignal {
 
 export interface TokenAnalytics {
   token: string;
+  contract: string;
   name: string;
   price: number;
   signals: TokenSignal[];
@@ -38,7 +29,6 @@ export default function TokenAnalytics() {
     setLoading(true);
     try {
       const data = await backendAPI.getTokenAnalytics(address);
-      //setSuggestions(data.suggestions);
       setAnalytics(data.analytics)
       setLastRefresh(new Date().toLocaleTimeString());
     } catch (e) {
@@ -52,14 +42,6 @@ export default function TokenAnalytics() {
     fetchTokenAnalytics();
   }, [address]);
 
-  const handleAction = (s: Suggestion) => {
-    if (s.action?.type === 'link' && s.action.url) {
-      window.open(s.action.url, '_blank');
-    } else if (s.action?.type === 'swap') {
-      const params = new URLSearchParams(s.action.swapParams);
-      window.location.href = `/swap?${params.toString()}`;
-    }
-  };
 
 
 return (
@@ -111,16 +93,16 @@ return (
           <p className="text-gray-500 mt-2">No analytics available right now.</p>
         </div>
       ) : (
-        /* Suggestions Grid */
+        /* Tokens Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {analytics.map((insight) => (
             <TokenInsightCard
-              key={insight.token}
-              insight={insight}
-              onExecute={(insight) => {
-                // will add function to handle the corresponding action
-                console.log('do something with:', insight.token);
-              }}
+              key={insight.token} 
+              token={insight.token} 
+              name={insight.name}
+              price={insight.price} 
+              contract={insight.contract} 
+              signals={insight.signals}              
             />
 ))}
         </div>
