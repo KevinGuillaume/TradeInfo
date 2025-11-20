@@ -13,11 +13,12 @@ export interface Transaction {
 
 export interface TokenBalance {
   contractAddress: string;
+  value_usd: number,
   name: string;
   symbol: string;
-  balance: string;
+  balance: number;
   logo?: string | null;
-  decimals: string | number;
+  decimals: number;
 }
 
 export interface EtherscanResponse<T> {

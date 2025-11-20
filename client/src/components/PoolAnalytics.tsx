@@ -1,7 +1,6 @@
-// components/PoolAnalytics.tsx
 import { useState, useEffect } from 'react';
 import PoolOpportunitiesGrid from './PoolAnalyticsCard';
-import { backendAPI } from '../api'; // adjust path
+import { backendAPI } from '../api';
 
 
 
@@ -19,10 +18,9 @@ interface ProcessedPool {
     isStablePair: boolean;
     isHighLiquidity: boolean;
     opportunityScore: number;
-    // Add your original pool data
     address: string;
-    tokens: string;        // e.g. "WETH / USDT"
-    feeTier: string;       // "0.01%"
+    tokens: string;        
+    feeTier: string;
     tvlUsd: number;
     volume24hUsd: number;
     fees24hUsd: number;

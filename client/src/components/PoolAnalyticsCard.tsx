@@ -1,5 +1,4 @@
-// components/PoolOpportunitiesGrid.tsx
-import { TrendingUp, AlertCircle, Sparkles, TrendingDown, ExternalLink } from 'lucide-react';
+import { TrendingUp, Sparkles, TrendingDown, ExternalLink } from 'lucide-react';
 
 interface PoolStats {
   tokenOneName: string,
@@ -15,10 +14,9 @@ interface PoolStats {
   isStablePair: boolean;
   isHighLiquidity: boolean;
   opportunityScore: number;
-  // Add your original pool data
   address: string;
-  tokens: string;        // e.g. "WETH / USDT"
-  feeTier: string;       // "0.01%"
+  tokens: string;        
+  feeTier: string; 
   tvlUsd: number;
   volume24hUsd: number;
   fees24hUsd: number;
@@ -59,27 +57,30 @@ export default function PoolOpportunitiesGrid({ pools }: PoolOpportunitiesGridPr
             key={pool.address}
             className="relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-gray-800/60 border-gray-700"
           >
-            {/* Hot Badge */}
-            {isHot && (
-              <div className="absolute top-3 right-3 z-10">
-                <span className="px-3 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/50 rounded-full flex items-center gap-1">
-                  HOT <Sparkles className="w-3 h-3" />
-                </span>
-              </div>
-            )}
 
             <div className="p-6">
               {/* Header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-white">{pool.tokenOneSymbol} / {pool.tokenTwoSymbol}</h3>
-                  <p className="text-sm text-gray-400">{pool.feeTier} fee</p>
+                    <div className="flex items-center gap-3 mb-1">
+                    <h3 className="text-xl font-bold text-white">
+                        {pool.tokenOneSymbol} / {pool.tokenTwoSymbol}
+                    </h3>
+                    {isHot && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-full shadow-lg shadow-red-500/30 animate-pulse">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Hot
+                        </span>
+                    )}
+                    </div>
+                    <p className="text-sm text-gray-400">{(Number(pool.feeTier) / 10000).toFixed(2)}% fee</p>
                 </div>
+
                 <div className="text-right">
-                  <p className="text-3xl font-black text-green-400">
+                    <p className="text-3xl font-black text-green-400">
                     {pool.apy7d.toFixed(1)}%
-                  </p>
-                  <p className="text-xs text-gray-500">Real 7d APY</p>
+                    </p>
+                    <p className="text-xs text-gray-500">Real 7d APY</p>
                 </div>
               </div>
 
