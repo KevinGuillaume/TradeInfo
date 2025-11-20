@@ -6,7 +6,7 @@ import TokenAnalytics from '../components/TokenAnalytics';
 import PoolAnalytics from '../components/PoolAnalytics';
 
 export default function HomeDEX() {
-  const [activeTab, setActiveTab] = useState<'pools' | 'swap' | 'tokens'>('tokens');
+  const [activeTab, setActiveTab] = useState<'pools' | 'swap' | 'tokens'>('pools');
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
@@ -17,16 +17,6 @@ export default function HomeDEX() {
           {/* Tabs */}
           <div className="flex border-b border-gray-700">
             <button
-              onClick={() => setActiveTab('tokens')}
-              className={`flex-1 py-4 px-6 text-lg font-semibold transition-all duration-300 ${
-                activeTab === 'tokens'
-                  ? 'text-white border-b-2 border-blue-500 bg-gray-700/50'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700/30'
-              }`}
-            >
-              Tokens
-            </button>
-            <button
               onClick={() => setActiveTab('pools')}
               className={`flex-1 py-4 px-6 text-lg font-semibold transition-all duration-300 ${
                 activeTab === 'pools'
@@ -35,6 +25,16 @@ export default function HomeDEX() {
               }`}
             >
               Pools
+            </button>
+            <button
+              onClick={() => setActiveTab('tokens')}
+              className={`flex-1 py-4 px-6 text-lg font-semibold transition-all duration-300 ${
+                activeTab === 'tokens'
+                  ? 'text-white border-b-2 border-blue-500 bg-gray-700/50'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/30'
+              }`}
+            >
+              Tokens
             </button>
             <button
               onClick={() => setActiveTab('swap')}
