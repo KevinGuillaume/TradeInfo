@@ -39,6 +39,17 @@ class OkuAPI {
             throw err;
         }
     }
+
+    async getLatestBlock(){
+        console.log("Getting latest block...");
+        const icarusUrl = '/ethereum/cush/liveBlock';
+        const body = {
+            params: []
+          };
+        const icarusRes = await this.request(icarusUrl, 'POST',body);
+        const icarusData = await icarusRes;
+        return icarusData.result; // returns just the block number
+    }
   
     async getTopPools() {
         console.log("Fetching top pools from Icarus Tools...");
@@ -70,7 +81,6 @@ class OkuAPI {
         return icarusData;
     }
 
-    
     async getTokenPrice(address) {
         console.log("Fetching token price from Icarus Tools...");
         const icarusUrl = '/ethereum/cush/searchTokenByAddress?limit=50&orderBy=total_fees_usd_desc&minTvl=100000';
@@ -92,12 +102,13 @@ class OkuAPI {
 
     
     async getUserTokenBalances(address) {
-        console.log("Fetching user token balances from Icarus Tools...");
+        console.log("Fetching user token balances from Icarus Tools...");   
+        const latestBlock = await this.getLatestBlock()     
         const icarusUrl = '/ethereum/cush/userTokenBalances';
         const body = {
             params: [
                 address,
-                16000000
+                latestBlock
               ]
           };
         const icarusRes = await this.request(icarusUrl, 'POST',body);

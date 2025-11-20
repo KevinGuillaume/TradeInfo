@@ -1,6 +1,5 @@
 import { backendAPI, type TokenBalance } from '../api';
 import { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
 import { useAccount, useChainId } from 'wagmi';
 
 interface NFT {
@@ -46,40 +45,55 @@ export default function ProfileSection() {
   };
 
   const fetchNFTs = async (address: string) => {
-  setLoadingNFTs(true);
-  try {
-    const data: any = await backendAPI.getNFTs(address);
+    setLoadingNFTs(true);
+    try {
+      const data: any = await backendAPI.getNFTs(address);
 
-    const validNFTs = data.nfts
-      .map((nft: any) => {
-        let image = nft.normalized_metadata?.image || '';
-        return {
-          ...nft,
-          image,
-          collectionName: nft.name || nft.normalized_metadata.name || 'Unknown'
-        };
-      })
-      .filter((nft: any) => {
-        if (!nft.normalized_metadata.image) return false;
-        if (nft.possible_spam) return false;
+      const validNFTs = data.nfts
+        .map((nft: any) => {
+          let image = nft.normalized_metadata?.image || '';
+          return {
+            ...nft,
+            image,
+            collectionName: nft.name || nft.normalized_metadata.name || 'Unknown'
+          };
+        })
+        .filter((nft: any) => {
+          if (!nft.normalized_metadata?.image) return false;
+          if (nft.possible_spam) return false;
 
-        const name = nft.normalized_metadata.name.toLowerCase();
-        // get rid of the junk.....
-        const spamKeywords = ['claim', 'reward', 'access', 'visit', 'steth', 'prize', 'mysterybox'];
-        if (spamKeywords.some(k => name.includes(k))) return false;
+          if(nft.name){
+            const name = nft.name.toLowerCase();
+            // get rid of the junk.....
+            const spamKeywords = ['claim', 'reward', 'access', 'visit', 'steth', 'prize', 'mysterybox'];
+            if (spamKeywords.some(k => name.includes(k))) return false;
+          }
 
-        if (nft.contract_type === 'ERC1155' && !nft.rarity_rank) return false;
+          if (nft.contract_type === 'ERC1155' && !nft.rarity_rank) return false;
 
-        return true;
-      })
+          return true;
+        })
+      console.log("Valid nfts: ", validNFTs)
+      setNfts(validNFTs);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingNFTs(false);
+    }
+  };
 
-    setNfts(validNFTs);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoadingNFTs(false);
-  }
-};
+  const formatTokenBalance = (rawBalance: number, symbol: string): string => {
+    if (rawBalance < 0.000001) {
+      return rawBalance < 0.00000001 
+        ? `<0.00000001 ${symbol}`
+        : `<0.000001 ${symbol}`;
+    }
+  
+    return rawBalance.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 8,
+    }).replace(/(\.\d*?[1-9])0+$|\.0*$/, '$1') + ` ${symbol}`;
+  };
 
   useEffect(() => {
     if (address && chainId === 1) {
@@ -150,7 +164,7 @@ export default function ProfileSection() {
                   </div>
                 ) : tokenBalances.length > 0 ? (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {tokenBalances.slice(0, 6).map((token) => (
+                    {tokenBalances.map((token) => (
                     <div
                       key={token.contractAddress}
                       className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-700/50 transition-all duration-200"
@@ -190,8 +204,11 @@ export default function ProfileSection() {
                       {/* Balance */}
                       <div className="text-right">
                         <p className="text-sm font-medium text-white">
-                          {Number(ethers.formatUnits(token.balance, token.decimals)).toFixed(4)}
+                          {formatTokenBalance(Number(token.balance), token.symbol)}
                         </p>
+                        {token.value_usd >= 0.01 && (
+                          <p className="text-xs text-gray-400">${token.value_usd.toFixed(2)}</p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -221,9 +238,6 @@ export default function ProfileSection() {
                           src={image}
                           alt={nft.name || 'NFT'}
                           className="w-full h-16 object-cover rounded-lg border border-gray-700 hover:border-purple-500 transition"
-                          onError={(e) => {
-                            e.currentTarget.src = '#'
-                          }}
                         />
                       );
                     })}

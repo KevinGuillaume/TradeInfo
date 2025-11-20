@@ -51,19 +51,13 @@ app.get('/api/token-balances/:address', async (req, res) => {
   console.log(`Fetching token balances for address: ${address}`);
 
   try {
-    const response = await Moralis.EvmApi.token.getWalletTokenBalances({
-      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
-      address,
-      excludeSpam: true,
-    });
-
-    const balances = response.raw.map(t => ({
+    const icarusBalance = await OkuApi.getUserTokenBalances(address)
+    const balances = icarusBalance.result.token_balances.map(t => ({
       contractAddress: t.token_address,
-      name: t.name,
-      symbol: t.symbol,
+      name: t.token_name,
+      symbol: t.token_symbol,
       decimals: Number(t.decimals),
-      balance: t.balance,
-      logo: t.logo              
+      balance: t.balance,             
 
     }));
 
@@ -191,17 +185,12 @@ app.get('/api/token-analytics', async (req, res) => {
     // ────── 1. Fetch Holdings via Moralis SDK (with USD prices) ──────
     console.log("Fetching token balances...");
     const analytics = []
-    const tokenBalancesResponse = await Moralis.EvmApi.token.getWalletTokenBalances({
-      chain: Moralis.EvmUtils.EvmChain.ETHEREUM,
-      address: userAddress,
-      excludeSpam: true,
-    });
-
-    const rawTokens = tokenBalancesResponse.raw;
+    const icarusBalance = await OkuApi.getUserTokenBalances(userAddress)
+    const tokensHeld = icarusBalance.result.token_balances
 
     // Fetch USD price for each token
     await Promise.all(
-      rawTokens.map(async (t) => {
+      tokensHeld.map(async (t) => {
         let usdValue = 0;
         try {
           const icarusTokenData = await OkuApi.getTokenPrice(t.token_address);
